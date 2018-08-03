@@ -40,7 +40,7 @@ class MappableTest extends TestCase
             // why yes, I'm showing off; don't worry, these fns will eventually be upgraded to proper library fns
             iterator_to_array(map(
                 compose(
-                    'IrRegular\Tests\Hopper\second',
+                    'IrRegular\Hopper\second',
                     'IrRegular\Tests\Hopper\inc'
                 ),
                 self::$hashMap

@@ -34,6 +34,24 @@ function first(iterable $collection)
 }
 
 /**
+ * Returns the second element of the collection
+ *
+ * Useful when dealing with [key, value] pairs returned by HashMap.
+ *
+ * @param iterable $collection
+ * @return mixed
+ */
+function second(iterable $collection)
+{
+    if (is_array($collection)) {
+        assert(count($collection) > 1);
+        return $collection[1];
+    }
+
+    return first(rest($collection));
+}
+
+/**
  * Returns the last element of the collection.
  *
  * Note that it will realise (and discard most of) the entire iterator, so don't feed it generators.

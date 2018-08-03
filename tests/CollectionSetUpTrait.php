@@ -40,11 +40,6 @@ trait CollectionSetUpTrait
     }
 }
 
-function second(array $value)
-{
-    $key = array_keys($value)[1];
-    return $value[$key];
-}
 
 function compose(callable ...$functions): callable
 {

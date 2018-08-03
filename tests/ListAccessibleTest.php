@@ -6,6 +6,7 @@ use IrRegular\Hopper\Collection;
 use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\last;
 use function IrRegular\Hopper\rest;
+use function IrRegular\Hopper\second;
 use PHPUnit\Framework\TestCase;
 
 class ListAccessibleTest extends TestCase
@@ -17,6 +18,13 @@ class ListAccessibleTest extends TestCase
         $this->assertEquals(1, first(self::$array));
         $this->assertEquals(1, first(self::$vector));
         $this->assertEquals(['key 0', 1], first(self::$hashMap));
+    }
+
+    public function testCanGetSecondElement()
+    {
+        $this->assertEquals(2, second(self::$array));
+        $this->assertEquals(2, second(self::$vector));
+        $this->assertEquals(['key 1', 2], second(self::$hashMap));
     }
 
     public function testCanGetLastElement()

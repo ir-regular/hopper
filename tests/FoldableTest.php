@@ -4,6 +4,7 @@ namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\foldl;
 use function IrRegular\Hopper\foldl1;
+use function IrRegular\Hopper\second;
 use PHPUnit\Framework\TestCase;
 
 class FoldableTest extends TestCase
