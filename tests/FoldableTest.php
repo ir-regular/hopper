@@ -4,6 +4,7 @@ namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\foldl;
 use function IrRegular\Hopper\foldl1;
+use function IrRegular\Hopper\partial;
 use function IrRegular\Hopper\second;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,7 @@ class FoldableTest extends TestCase
             16,
             foldl1(
                 // `array_sum` expects an array input, so we need to "pack" the arguments with `apply`
-                partial('IrRegular\Tests\Hopper\apply', 'array_sum'),
+                partial('IrRegular\Hopper\apply', 'array_sum'),
                 self::$array
             )
         );
@@ -29,7 +30,7 @@ class FoldableTest extends TestCase
             16,
             foldl1(
                 // `array_sum` expects an array input, so we need to "pack" the arguments with `apply`
-                partial('IrRegular\Tests\Hopper\apply', 'array_sum'),
+                partial('IrRegular\Hopper\apply', 'array_sum'),
                 self::$vector
             )
         );

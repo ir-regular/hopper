@@ -39,32 +39,3 @@ trait CollectionSetUpTrait
         return "key $value";
     }
 }
-
-
-function compose(callable ...$functions): callable
-{
-    return function ($x) use ($functions) {
-        foreach ($functions as $f) {
-            $x = $f($x);
-        }
-        return $x;
-    };
-}
-
-function partial(callable $function, ...$operands): callable
-{
-    return function (...$moreOperands) use ($function, $operands) {
-        return $function(...$operands, ...$moreOperands);
-    };
-}
-
-function apply(callable $function, ...$operands)
-{
-    return $function($operands);
-}
-
-
-function inc(int $value): int
-{
-    return $value + 1;
-}

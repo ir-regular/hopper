@@ -2,6 +2,7 @@
 
 namespace IrRegular\Tests\Hopper;
 
+use function IrRegular\Hopper\compose;
 use function IrRegular\Hopper\map;
 use PHPUnit\Framework\TestCase;
 
@@ -9,11 +10,16 @@ class MappableTest extends TestCase
 {
     use CollectionSetUpTrait;
 
+    public function increment(int $value): int
+    {
+        return $value + 1;
+    }
+
     public function testArrayIsMappable()
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            iterator_to_array(map('IrRegular\Tests\Hopper\inc', self::$array))
+            iterator_to_array(map([$this, 'increment'], self::$array))
         );
     }
 
@@ -21,7 +27,7 @@ class MappableTest extends TestCase
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            iterator_to_array(map('IrRegular\Tests\Hopper\inc', self::$vector))
+            iterator_to_array(map([$this, 'increment'], self::$vector))
         );
     }
 
@@ -37,11 +43,10 @@ class MappableTest extends TestCase
                 'key 5' => 2,
                 'key 6' => 5
             ],
-            // why yes, I'm showing off; don't worry, these fns will eventually be upgraded to proper library fns
             iterator_to_array(map(
                 compose(
                     'IrRegular\Hopper\second',
-                    'IrRegular\Tests\Hopper\inc'
+                    [$this, 'increment']
                 ),
                 self::$hashMap
             ))

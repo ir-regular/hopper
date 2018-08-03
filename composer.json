@@ -29,7 +29,10 @@
   "autoload": {
     "psr-4": {
       "IrRegular\\Hopper\\": "src/"
-    }
+    },
+    "files": [
+      "src/Composable.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
