@@ -13,7 +13,17 @@ class SetTest extends TestCase
         $o1 = new \stdClass();
 
         $set = new Set([$o1]);
+        $this->assertEquals(1, $set->getCount());
         $this->assertFalse($set->isEmpty());
         $this->assertTrue($set->isKey($o1));
+    }
+
+    public function testSetRemovesDuplicates()
+    {
+        $o1 = new \stdClass();
+        $o2 = new \stdClass();
+
+        $set = new Set([$o1, $o2, $o1]);
+        $this->assertEquals(2, $set->getCount());
     }
 }

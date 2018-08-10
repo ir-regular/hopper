@@ -7,6 +7,7 @@ use IrRegular\Hopper\Collection\HashMap;
 use IrRegular\Hopper\Collection\Set;
 use IrRegular\Hopper\Collection\Vector;
 use function IrRegular\Hopper\is_empty;
+use function IrRegular\Hopper\size;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
@@ -24,5 +25,19 @@ class CollectionTest extends TestCase
         $this->assertFalse(is_empty(self::$hashMap));
         $this->assertFalse(is_empty(self::$set));
         $this->assertFalse(is_empty(self::$vector));
+    }
+
+    public function testCanTestElementCount()
+    {
+        $this->assertEquals(0, size([]));
+        $this->assertEquals(0, size(new HashMap([])));
+        $this->assertEquals(0, size(new Set([])));
+        $this->assertEquals(0, size(new Vector([])));
+
+        $this->assertEquals(7, size(self::$array));
+        $this->assertEquals(7, size(self::$hashMap));
+        $this->assertEquals(7, size(self::$vector));
+        // set removes duplicates
+        $this->assertEquals(4, size(self::$set));
     }
 }

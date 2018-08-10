@@ -9,6 +9,8 @@ namespace IrRegular\Hopper;
 interface Collection
 {
     public function isEmpty(): bool;
+
+    public function getCount(): int;
 }
 
 /**
@@ -27,5 +29,21 @@ function is_empty(iterable $collection): bool
     } else {
         assert(is_array($collection)); // just in case of future weirdness
         return empty($collection);
+    }
+}
+
+/**
+ * @param iterable $collection
+ * @return int
+ */
+function size(iterable $collection): int
+{
+    if ($collection instanceof Collection) {
+        return $collection->getCount();
+    } elseif ($collection instanceof \Iterator) {
+        return iterator_count($collection);
+    } else {
+        assert(is_array($collection));
+        return count($collection);
     }
 }

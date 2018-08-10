@@ -66,6 +66,11 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
         return empty($this->array);
     }
 
+    public function getCount(): int
+    {
+        return count($this->array);
+    }
+
     public function first()
     {
         assert(!empty($this->array));

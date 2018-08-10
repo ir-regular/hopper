@@ -31,6 +31,11 @@ class Set implements Collection, ListAccessible, Indexable, Foldable, Mappable
         return empty($this->array);
     }
 
+    public function getCount(): int
+    {
+        return count($this->array);
+    }
+
     // Set does not have a defined access order.
     // To perform in-order processing, you must convert it to a vector.
     // @TODO: conversion methods
