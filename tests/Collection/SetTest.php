@@ -14,5 +14,6 @@ class SetTest extends TestCase
 
         $set = new Set([$o1]);
         $this->assertFalse($set->isEmpty());
+        $this->assertTrue($set->isKey($o1));
     }
 }

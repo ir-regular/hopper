@@ -13,6 +13,9 @@ trait CollectionSetUpTrait
     /** @var array */
     private static $array;
 
+    /** @var array */
+    private static $nestedArray;
+
     /** @var Collection\Vector */
     private static $vector;
 
@@ -33,6 +36,13 @@ trait CollectionSetUpTrait
 
         $keys = array_map('self::encodeKey', array_keys(self::$array));
         self::$hashMap = new Collection\HashMap(array_combine($keys, self::$array));
+
+        self::$nestedArray = [
+            ['name' => 'John', 'address' => ['city' => 'New York']],
+            ['name' => 'Jane', 'address' => ['city' => 'London']],
+            ['name' => 'Sam', 'address' => ['city' => 'Toronto', 'country' => 'Canada']],
+            ['name' => 'Alicia']
+        ];
     }
 
     protected static function encodeKey($value): string

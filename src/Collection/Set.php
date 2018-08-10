@@ -5,10 +5,11 @@ namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
+use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
-class Set implements Collection, ListAccessible, Foldable, Mappable
+class Set implements Collection, ListAccessible, Indexable, Foldable, Mappable
 {
     /**
      * @var array
@@ -62,6 +63,20 @@ class Set implements Collection, ListAccessible, Foldable, Mappable
     public function rest(): ListAccessible
     {
         throw new \BadMethodCallException('Set does not have a defined access order: cannot retrieve rest');
+    }
+
+    public function get($key, $default = null)
+    {
+        return $this->isKey($key) ? $key : $default;
+    }
+
+    public function isKey($key): bool
+    {
+        if (!self::isValidArrayKey($key)) {
+            $key = $this->convertToArrayKey($key);
+        }
+
+        return array_key_exists($key, $this->uniqueIndex);
     }
 
     public function getIterator()

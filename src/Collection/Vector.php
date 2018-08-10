@@ -5,10 +5,11 @@ namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
+use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
-class Vector implements Collection, Foldable, ListAccessible, Mappable
+class Vector implements Collection, Foldable, ListAccessible, Mappable, Indexable
 {
     /**
      * @var array
@@ -62,6 +63,18 @@ class Vector implements Collection, Foldable, ListAccessible, Mappable
         $rest = new Vector([]);
         $rest->array = array_slice($this->array, 1);
         return $rest;
+    }
+
+    public function get($key, $default = null)
+    {
+        assert(is_int($key));
+        return $this->array[$key] ?? $default;
+    }
+
+    public function isKey($key): bool
+    {
+        assert(is_int($key));
+        return array_key_exists($key, $this->array);
     }
 
     public function getIterator()

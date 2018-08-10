@@ -5,10 +5,11 @@ namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
+use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
-class HashMap implements Collection, Foldable, ListAccessible, Mappable
+class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldable
 {
     const KEY_PREFIX = 'k_';
 
@@ -88,6 +89,19 @@ class HashMap implements Collection, Foldable, ListAccessible, Mappable
         $rest->index = array_slice($this->index, 1);
         $rest->array = array_slice($this->array, 1);
         return $rest;
+    }
+
+    public function get($key, $default = null)
+    {
+        $safeKey = $this->sanitiseKey($key);
+        $key = $this->index[$safeKey] ?? null;
+        return $this->array[$key] ?? $default;
+    }
+
+    public function isKey($key): bool
+    {
+        $safeKey = $this->sanitiseKey($key);
+        return array_key_exists($safeKey, $this->index);
     }
 
     protected function sanitiseKey($originalKey): string
