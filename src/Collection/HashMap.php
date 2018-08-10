@@ -30,14 +30,15 @@ class HashMap implements Collection, Foldable, ListAccessible, Mappable
         // (but also preserve the original keys with appropriate types)
 
         foreach (array_keys($a) as $originalKey) {
-            $this->index[$this->generateKey($originalKey)] = $originalKey;
+            $safeKey = $this->sanitiseKey($originalKey);
+            $this->index[$safeKey] = $originalKey;
         }
     }
 
     public function foldl(callable $closure, $initialValue)
     {
         return array_reduce(
-            array_map(null, $this->index, $this->array), // generates [key, value] pairs
+            $this->getKeyValuePairList(),
             $closure,
             $initialValue
         );
@@ -46,9 +47,7 @@ class HashMap implements Collection, Foldable, ListAccessible, Mappable
     public function foldr(callable $closure, $initialValue)
     {
         return array_reduce(
-            array_reverse(
-                array_map(null, $this->index, $this->array) // generates [key, value] pairs
-            ),
+            array_reverse($this->getKeyValuePairList()),
             $closure,
             $initialValue
         );
@@ -91,16 +90,26 @@ class HashMap implements Collection, Foldable, ListAccessible, Mappable
         return $rest;
     }
 
-    private function generateKey($originalKey): string
+    protected function sanitiseKey($originalKey): string
     {
         // 1. prefix ensures numeric strings don't get cast to numbers
         // 2. `strval` is safe since it distinguishes between 0 and ''
         return self::KEY_PREFIX . strval($originalKey);
     }
 
+    /**
+     * Returns an (eagerly generated) array of [key, value] pairs of original array.
+     *
+     * @return array
+     */
+    protected function getKeyValuePairList(): array
+    {
+        return array_map(null, $this->index, $this->array);
+    }
+
     public function getIterator()
     {
         // key-value pairs
-        return new \ArrayIterator(array_map(null, $this->index, $this->array));
+        return new \ArrayIterator($this->getKeyValuePairList());
     }
 }
