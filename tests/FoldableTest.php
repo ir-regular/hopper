@@ -57,4 +57,16 @@ class FoldableTest extends TestCase
             )
         );
     }
+
+
+    /**
+     * @expectedException \BadMethodCallException
+     */
+    public function testSetIsNotFoldable()
+    {
+        foldl1(
+            partial('IrRegular\Hopper\apply', 'array_sum'),
+            self::$set
+        );
+    }
 }

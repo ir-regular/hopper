@@ -53,4 +53,14 @@ class MappableTest extends TestCase
             ))
         );
     }
+
+    /**
+     * @expectedException \BadMethodCallException
+     */
+    public function testSetIsNotMappable()
+    {
+        // note that this only throws after the generator has been first accessed
+        // thus the need for `iterator_to_array`
+        iterator_to_array(map([$this, 'increment'], self::$set));
+    }
 }

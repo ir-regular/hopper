@@ -8,39 +8,45 @@ use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
-class Set implements Collection, Foldable, ListAccessible, Mappable
+class Set implements Collection, ListAccessible, Foldable, Mappable
 {
     /**
      * @var array
      */
-    public $array;
+    public $uniqueIndex = [];
+
+    /**
+     * @var array
+     */
+    public $array = [];
 
     public function __construct(array $a)
     {
-        // ensure values of $a are a unique set
-        $this->array = array_fill_keys($a, true);
-    }
-
-    public function foldl(callable $closure, $initialValue)
-    {
-        return array_reduce(array_keys($this->array), $closure, $initialValue);
-    }
-
-    public function foldr(callable $closure, $initialValue)
-    {
-        return array_reduce(array_reverse(array_keys($this->array)), $closure, $initialValue);
-    }
-
-    public function map(callable $closure): \Generator
-    {
-        foreach (array_keys($this->array) as $value) {
-            yield $closure($value);
-        }
+        array_map([$this, 'addElement'], $a);
     }
 
     public function isEmpty(): bool
     {
         return empty($this->array);
+    }
+
+    // Set does not have a defined access order.
+    // To perform in-order processing, you must convert it to a vector.
+    // @TODO: conversion methods
+
+    public function foldl(callable $closure, $initialValue)
+    {
+        throw new \BadMethodCallException('Set does not have a defined access order: cannot fold');
+    }
+
+    public function foldr(callable $closure, $initialValue)
+    {
+        throw new \BadMethodCallException('Set does not have a defined access order: cannot fold');
+    }
+
+    public function map(callable $closure): \Generator
+    {
+        throw new \BadMethodCallException('Set does not have a defined access order: cannot map');
     }
 
     public function first()
@@ -60,6 +66,42 @@ class Set implements Collection, Foldable, ListAccessible, Mappable
 
     public function getIterator()
     {
-        return new \ArrayIterator(array_keys($this->array));
+        return new \ArrayIterator($this->array);
+    }
+
+    /**
+     * @param mixed $element
+     * @return bool
+     */
+    protected static function isValidArrayKey($element): bool
+    {
+        return is_int($element) || is_string($element);
+    }
+
+    /**
+     * @param mixed $v
+     * @return string
+     */
+    protected function convertToArrayKey($v): string
+    {
+        return is_object($v) ? spl_object_hash($v) : strval($v);
+    }
+
+    /**
+     * @param mixed $element
+     * @return bool Whether the element was added to the set or not (because it already existed in it.)
+     */
+    protected function addElement($element): bool
+    {
+        $key = self::isValidArrayKey($element) ? $element : $this->convertToArrayKey($element);
+
+        $elementAdded = !array_key_exists($key, $this->uniqueIndex);
+
+        if ($elementAdded) {
+            $this->uniqueIndex[$key] = true;
+            $this->array[] = $element;
+        }
+
+        return $elementAdded;
     }
 }

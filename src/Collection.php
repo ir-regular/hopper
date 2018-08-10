@@ -4,13 +4,9 @@ declare(strict_types=1);
 namespace IrRegular\Hopper;
 
 /**
- * Aggregate interface that all collections implement.
- *
- * Extends \IteratorAggregate because I want the collections to fit the `iterable` slot,
- * but that's currently underdeveloped because all the hopper functions prefer interacting
- * with appropriate interface methods from `IrRegular\Hopper` interfaces.
+ * Represents a collection that holds elements but does not specify the access method.
  */
-interface Collection extends \IteratorAggregate
+interface Collection
 {
     public function isEmpty(): bool;
 }
