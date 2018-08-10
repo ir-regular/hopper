@@ -50,6 +50,41 @@ function partial(callable $function, ...$operands): callable
 }
 
 /**
+ * Returns a single-argument function, assuming the provided argument should be injected first to $function.
+ *
+ * For inspiration, see -> threading macro in Clojure.
+ * Functions that require this pattern deal with a colletion as a single element (example: get_in.)
+ *
+ * @param callable $function
+ * @param mixed ...$operands
+ * @return callable
+ */
+function partial_first(callable $function, ...$operands): callable
+{
+    return function ($x) use ($function, $operands) {
+        return $function($x, ...$operands);
+    };
+}
+
+/**
+ * Returns a single-argument function, assuming the provided argument should be injected last to $function.
+ *
+ * For inspiration, see ->> threading macro in Clojure.
+ * Functions that require this pattern deal with all elements of a collection at once (example: map.)
+ *
+ * @param callable $function
+ * @param mixed ...$operands
+ * @return callable
+ */
+function partial_last(callable $function, ...$operands): callable
+{
+    return function ($x) use ($function, $operands) {
+        $operands[] = $x;
+        return $function(...$operands);
+    };
+}
+
+/**
  * Sometimes, a library function expects an array input, but the delivery mechanism enforces
  * that values will be passed in separate arguments. So that's when you use apply, basically.
  *

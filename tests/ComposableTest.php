@@ -6,6 +6,8 @@ namespace IrRegular\Tests\Hopper;
 use function IrRegular\Hopper\apply;
 use function IrRegular\Hopper\compose;
 use function IrRegular\Hopper\partial;
+use function IrRegular\Hopper\partial_first;
+use function IrRegular\Hopper\partial_last;
 use PHPUnit\Framework\TestCase;
 
 class ComposableTest extends TestCase
@@ -30,6 +32,22 @@ class ComposableTest extends TestCase
         $doubleAll = partial('array_map', $double);
 
         $this->assertEquals([0, 2, 4, 6], $doubleAll([0, 1, 2, 3]));
+    }
+
+    public function testPartialFirst()
+    {
+        $mapOnRange = partial_first('\array_map', [0, 1, 2, 3]);
+
+        $this->assertEquals([0, 2, 4, 6], $mapOnRange(function ($x) { return 2 * $x; }));
+        $this->assertEquals([-1, 0, 1, 2], $mapOnRange(function ($x) { return $x - 1; }));
+    }
+
+    public function testPartialLast()
+    {
+        $repeatFourTimes = partial_last('\array_fill', 0, 4);
+
+        $this->assertEquals(['x', 'x', 'x', 'x'], $repeatFourTimes('x'));
+        $this->assertEquals([1, 1, 1, 1], $repeatFourTimes(1));
     }
 
     public function testApply()
