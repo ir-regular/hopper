@@ -86,8 +86,8 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
         if (is_object($key) || is_scalar($key)) {
             // objects or scalars are easy to convert to a string
 
-            if (!is_valid_array_key($key)) {
-                $key = convert_to_valid_array_key($key);
+            if (!is_valid_hash_map_key($key)) {
+                $key = convert_to_valid_hash_map_key($key);
             }
 
             assert(is_string($key) || is_int($key));
@@ -119,9 +119,9 @@ function set(iterable $collection)
     $uniqueIndex = [];
 
     foreach ($collection as $element) {
-        $key = is_valid_array_key($element)
+        $key = is_valid_hash_map_key($element)
             ? $element
-            : convert_to_valid_array_key($element);
+            : convert_to_valid_hash_map_key($element);
 
         $elementAdded = !array_key_exists($key, $uniqueIndex);
 

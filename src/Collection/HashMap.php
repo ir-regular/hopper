@@ -8,6 +8,7 @@ use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
+use function IrRegular\Hopper\size;
 
 class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldable
 {
@@ -71,8 +72,9 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     {
         assert(!empty($this->array));
 
-        $key = array_keys($this->array)[0];
-        // $key = array_key_first($this->array); // PHP 7.3
+        $safeKey = array_keys($this->index)[0];
+        // $safeKey = array_key_first($this->index); // PHP 7.3
+        $key = $this->index[$safeKey];
         return [$key, $this->array[$key]];
     }
 
@@ -80,8 +82,9 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     {
         assert(!empty($this->array));
 
-        $key = array_keys($this->array)[count($this->array) - 1];
-        // $key = array_key_last($this->array); // PHP 7.3
+        $safeKey = array_keys($this->index)[count($this->index) - 1];
+        // $key = array_key_last($this->index); // PHP 7.3
+        $key = $this->index[$safeKey];
         return [$key, $this->array[$key]];
     }
 
@@ -100,7 +103,7 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function get($key, $default = null)
     {
         if (!is_valid_hash_map_key($key)) {
-            $safeKey = convert_to_valid_array_key($key);
+            $safeKey = convert_to_valid_hash_map_key($key);
             $key = $this->index[$safeKey] ?? null;
         }
 
@@ -110,15 +113,16 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function isKey($key): bool
     {
         if (!is_valid_hash_map_key($key)) {
-            $key = convert_to_valid_array_key($key);
+            $key = convert_to_valid_hash_map_key($key);
+            return array_key_exists($key, $this->index);
+        } else {
+            return array_key_exists($key, $this->array);
         }
-
-        return array_key_exists($key, $this->index);
     }
 
     public function getKeys(): iterable
     {
-        return array_keys($this->array);
+        return array_values($this->index);
     }
 
     /**
@@ -138,24 +142,45 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     }
 }
 
-function hash_map(iterable $collection)
+/**
+ * If you use numerical strings as indices, PHP will convert them to ints
+ * before handing it over to this function. So, if you really want to have keys like '1', '2', ...
+ * you need to supply the keys in the optional $keys argument
+ *
+ * @param iterable $collection
+ * @param iterable|null $keys Keys of the correct, un-cast-by-PHP type.
+ * @return HashMap
+ */
+function hash_map(iterable $collection, iterable $keys = null)
 {
     if ($collection instanceof \Traversable) {
         $collection = iterator_to_array($collection, true);
     }
 
+    if (empty($keys)) {
+        $keys = array_keys($collection);
+    } else {
+        assert(size($keys) == size($collection));
+    }
+
     // ensure you can perform operations on string keys
     // (but also preserve the original keys with appropriate types)
 
+    $values = [];
     $stringIndex = [];
 
-    foreach (array_keys($collection) as $originalKey) {
+    foreach ($collection as $value) {
+        $originalKey = current($keys);
         $safeKey = is_valid_hash_map_key($originalKey)
             ? $originalKey
-            : convert_to_valid_array_key($originalKey);
+            : convert_to_valid_hash_map_key($originalKey);
 
         $stringIndex[$safeKey] = $originalKey;
+        // why not just supply $collection instead of rebuilding it as $values?
+        // because you need to be able to reindex using $keys
+        $values[$originalKey] = $value;
+        next($keys);
     }
 
-    return new HashMap($collection, $stringIndex);
+    return new HashMap($values, $stringIndex);
 }

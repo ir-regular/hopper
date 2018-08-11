@@ -8,17 +8,6 @@ declare(strict_types=1);
  */
 
 /**
- * A value has to be an int or a string for a PHP array to be indexable as such.
- *
- * @param mixed $v
- * @return bool
- */
-function is_valid_array_key($v): bool
-{
-    return is_int($v) || is_string($v);
-}
-
-/**
  * A value has to be a non-numeric string for a PHP to treat it as a hash map key (instead of casting to int.)
  *
  * @param mixed $v
@@ -26,24 +15,32 @@ function is_valid_array_key($v): bool
  */
 function is_valid_hash_map_key($v): bool
 {
-    return is_string($v) && !is_numeric($v);
+    return is_string($v) && !ctype_digit($v);
 }
 
 /**
  * @param mixed $v
  * @return string
  */
-function convert_to_valid_array_key($v): string
+function convert_to_valid_hash_map_key($v): string
 {
-    if (is_object($v)) {
-        return spl_object_hash($v);
+    if (is_string($v)) {
+        if (ctype_digit($v)) {
+            // prefix ensures numeric strings don't get cast to numbers
+            return 'ns_' . strval($v);
+        } else {
+            return $v; // no conversion - no prefix
+        }
+
+    } elseif (is_integer($v)) {
+        // prefix ensures ints will be treated as strings
+        return 'i_' . strval($v);
+
+    } elseif (is_object($v)) {
+        return 'o_' . spl_object_hash($v);
 
     } elseif (is_array($v)) {
-        return md5(var_export($v, true)); // ¯\_(ツ)_/¯ I know, risk of collision
-
-    } elseif (is_string($v)) {
-        // prefix ensures numeric strings don't get cast to numbers
-        return is_numeric($v) ? 'k_' . strval($v) : $v;
+        return 'a_' . md5(var_export($v, true)); // ¯\_(ツ)_/¯ I know, risk of collision
 
     } else {
         // `strval` is safe since it distinguishes between 0 and ''

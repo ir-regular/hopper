@@ -55,4 +55,17 @@ class SetTest extends TestCase
     {
         $this->assertEquals(self::$set->getKeys(), self::$set->getValues());
     }
+
+    public function testSetCanStoreNumericStrings()
+    {
+        $set = set(['1', '2', '1']);
+
+        $this->assertEquals(2, $set->getCount());
+
+        // key type matters!
+        $this->assertTrue($set->isKey('1'));
+        $this->assertFalse($set->isKey(1));
+        $this->assertTrue(['1', '2'] === $set->getKeys());
+        $this->assertTrue(['1', '2'] === $set->getValues());
+    }
 }
