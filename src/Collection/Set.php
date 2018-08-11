@@ -84,8 +84,8 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
 
     public function isKey($key): bool
     {
-        if (!self::isValidArrayKey($key)) {
-            $key = $this->convertToArrayKey($key);
+        if (!is_valid_array_key($key)) {
+            $key = convert_to_valid_array_key($key);
         }
 
         return array_key_exists($key, $this->uniqueIndex);
@@ -103,33 +103,13 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
 
     /**
      * @param mixed $element
-     * @return bool
-     */
-    protected static function isValidArrayKey($element): bool
-    {
-        return is_int($element) || is_string($element);
-    }
-
-    /**
-     * @param mixed $v
-     * @return string
-     */
-    protected function convertToArrayKey($v): string
-    {
-        return is_object($v)
-            ? spl_object_hash($v)
-            : is_array($v)
-                ? md5(var_export($v, true)) // ¯\_(ツ)_/¯ I know, risk of collision
-                : strval($v);
-    }
-
-    /**
-     * @param mixed $element
      * @return bool Whether the element was added to the set or not (because it already existed in it.)
      */
     protected function addElement($element): bool
     {
-        $key = self::isValidArrayKey($element) ? $element : $this->convertToArrayKey($element);
+        $key = is_valid_array_key($element)
+            ? $element
+            : convert_to_valid_array_key($element);
 
         $elementAdded = !array_key_exists($key, $this->uniqueIndex);
 
