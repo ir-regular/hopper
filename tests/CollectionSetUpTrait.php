@@ -29,13 +29,13 @@ trait CollectionSetUpTrait
     {
         self::$array = [1, 2, 1, 4, 3, 1, 4];
 
-        self::$vector = new Collection\Vector(self::$array);
+        self::$vector = Collection\vector(self::$array);
 
         // note that $array contains duplicates of the first and last element
-        self::$set = new Collection\Set(self::$array);
+        self::$set = Collection\set(self::$array);
 
         $keys = array_map('self::encodeKey', array_keys(self::$array));
-        self::$hashMap = new Collection\HashMap(array_combine($keys, self::$array));
+        self::$hashMap = Collection\hash_map(array_combine($keys, self::$array));
 
         self::$nestedArray = [
             ['name' => 'John', 'address' => ['city' => 'New York']],

@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
-use IrRegular\Hopper\Collection;
+use function IrRegular\Hopper\Collection\vector;
+use function IrRegular\Hopper\Collection\hash_map;
 use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\last;
 use function IrRegular\Hopper\rest;
@@ -43,12 +44,12 @@ class ListAccessibleTest extends TestCase
         );
 
         $this->assertEquals(
-            new Collection\Vector([2, 1, 4, 3, 1, 4]),
+            vector([2, 1, 4, 3, 1, 4]),
             rest(self::$vector)
         );
 
         $this->assertEquals(
-            new Collection\HashMap([
+            hash_map([
                 'key 1' => 2,
                 'key 2' => 1,
                 'key 3' => 4,

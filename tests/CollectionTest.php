@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
-use IrRegular\Hopper\Collection\HashMap;
-use IrRegular\Hopper\Collection\Set;
-use IrRegular\Hopper\Collection\Vector;
+use function IrRegular\Hopper\Collection\hash_map;
+use function IrRegular\Hopper\Collection\set;
+use function IrRegular\Hopper\Collection\vector;
 use function IrRegular\Hopper\is_empty;
 use function IrRegular\Hopper\size;
 use PHPUnit\Framework\TestCase;
@@ -17,9 +17,9 @@ class CollectionTest extends TestCase
     public function testCanTestEmptiness()
     {
         $this->assertTrue(is_empty([]));
-        $this->assertTrue(is_empty(new HashMap([])));
-        $this->assertTrue(is_empty(new Set([])));
-        $this->assertTrue(is_empty(new Vector([])));
+        $this->assertTrue(is_empty(hash_map([])));
+        $this->assertTrue(is_empty(set([])));
+        $this->assertTrue(is_empty(vector([])));
 
         $this->assertFalse(is_empty(self::$array));
         $this->assertFalse(is_empty(self::$hashMap));
@@ -30,9 +30,9 @@ class CollectionTest extends TestCase
     public function testCanTestElementCount()
     {
         $this->assertEquals(0, size([]));
-        $this->assertEquals(0, size(new HashMap([])));
-        $this->assertEquals(0, size(new Set([])));
-        $this->assertEquals(0, size(new Vector([])));
+        $this->assertEquals(0, size(hash_map([])));
+        $this->assertEquals(0, size(set([])));
+        $this->assertEquals(0, size(vector([])));
 
         $this->assertEquals(7, size(self::$array));
         $this->assertEquals(7, size(self::$hashMap));

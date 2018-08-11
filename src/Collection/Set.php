@@ -106,7 +106,11 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
      */
     protected function convertToArrayKey($v): string
     {
-        return is_object($v) ? spl_object_hash($v) : strval($v);
+        return is_object($v)
+            ? spl_object_hash($v)
+            : is_array($v)
+                ? md5(var_export($v, true)) // ¯\_(ツ)_/¯ I know, risk of collision
+                : strval($v);
     }
 
     /**
@@ -126,4 +130,9 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
 
         return $elementAdded;
     }
+}
+
+function set(iterable $collection)
+{
+    return new Set($collection);
 }

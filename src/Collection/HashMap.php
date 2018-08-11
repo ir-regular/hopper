@@ -136,3 +136,8 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
         return new \ArrayIterator($this->getKeyValuePairList());
     }
 }
+
+function hash_map(iterable $collection)
+{
+    return new HashMap($collection);
+}

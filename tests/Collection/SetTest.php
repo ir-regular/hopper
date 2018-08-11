@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper\Collection;
 
 use IrRegular\Hopper\Collection\Set;
+use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
 
 class SetTest extends TestCase
 {
+    use CollectionSetUpTrait;
+
     public function testSetCanContainObjects()
     {
         $o1 = new \stdClass();
@@ -21,7 +24,10 @@ class SetTest extends TestCase
     public function testSetRemovesDuplicates()
     {
         $o1 = new \stdClass();
+        $o1->name = 'Jill';
+
         $o2 = new \stdClass();
+        $o2->name = 'Jack';
 
         $set = new Set([$o1, $o2, $o1]);
         $this->assertEquals(2, $set->getCount());
@@ -36,5 +42,12 @@ class SetTest extends TestCase
         $this->assertTrue($set->isKey(1));
         $this->assertTrue($set->isKey(2));
         $this->assertTrue($set->isKey(3));
+    }
+
+    public function testCanCreateSetFromNestedArray()
+    {
+        $set = new Set(self::$nestedArray);
+        $this->assertEquals(4, $set->getCount());
+        $this->assertTrue($set->isKey(['name' => 'John', 'address' => ['city' => 'New York']]));
     }
 }
