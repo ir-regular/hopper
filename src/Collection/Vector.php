@@ -9,17 +9,23 @@ use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
-class Vector implements Collection, Foldable, ListAccessible, Mappable, Indexable
+class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldable
 {
     /**
      * @var array
      */
     public $array;
 
-    public function __construct(array $a)
+    public function __construct(iterable $collection)
     {
-        // ensure contiguous numeric keys
-        $this->array = array_values($a);
+        // ensure contiguous numeric keys by stripping the existing keys
+
+        if ($collection instanceof \Traversable) {
+            $this->array = iterator_to_array($collection, false);
+        } else {
+            assert(is_array($collection));
+            $this->array = array_values($collection);
+        }
     }
 
     public function foldl(callable $closure, $initialValue)

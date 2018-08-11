@@ -9,7 +9,7 @@ use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
-class Set implements Collection, ListAccessible, Indexable, Foldable, Mappable
+class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
 {
     /**
      * @var array
@@ -21,9 +21,11 @@ class Set implements Collection, ListAccessible, Indexable, Foldable, Mappable
      */
     public $array = [];
 
-    public function __construct(array $a)
+    public function __construct(iterable $collection)
     {
-        array_map([$this, 'addElement'], $a);
+        foreach ($collection as $element) {
+            $this->addElement($element);
+        }
     }
 
     public function isEmpty(): bool

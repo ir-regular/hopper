@@ -16,21 +16,25 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     /**
      * @var array
      */
-    public $index;
+    public $index = [];
 
     /**
      * @var array
      */
-    public $array;
+    public $array = [];
 
-    public function __construct(array $a)
+    public function __construct(iterable $collection)
     {
-        $this->array = $a;
+        if ($collection instanceof \Traversable) {
+            $collection = iterator_to_array($collection, true);
+        }
+
+        $this->array = $collection;
 
         // ensure you can perform operations on string keys
         // (but also preserve the original keys with appropriate types)
 
-        foreach (array_keys($a) as $originalKey) {
+        foreach (array_keys($collection) as $originalKey) {
             $safeKey = $this->sanitiseKey($originalKey);
             $this->index[$safeKey] = $originalKey;
         }

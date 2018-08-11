@@ -26,4 +26,15 @@ class SetTest extends TestCase
         $set = new Set([$o1, $o2, $o1]);
         $this->assertEquals(2, $set->getCount());
     }
+
+    public function testCanCreateSetFromIterator()
+    {
+        $iterator = new \ArrayIterator([1, 2, 3, 1, 2, 3]);
+        $set = new Set($iterator);
+
+        $this->assertEquals(3, $set->getCount());
+        $this->assertTrue($set->isKey(1));
+        $this->assertTrue($set->isKey(2));
+        $this->assertTrue($set->isKey(3));
+    }
 }
