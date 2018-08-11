@@ -14,18 +14,11 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
     /**
      * @var array
      */
-    public $array;
+    protected $array;
 
-    public function __construct(iterable $collection)
+    public function __construct(array $collection)
     {
-        // ensure contiguous numeric keys by stripping the existing keys
-
-        if ($collection instanceof \Traversable) {
-            $this->array = iterator_to_array($collection, false);
-        } else {
-            assert(is_array($collection));
-            $this->array = array_values($collection);
-        }
+        $this->array = $collection;
     }
 
     public function foldl(callable $closure, $initialValue)
@@ -76,8 +69,7 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
 
     public function rest(): ListAccessible
     {
-        $rest = new Vector([]);
-        $rest->array = array_slice($this->array, 1);
+        $rest = new Vector(array_slice($this->array, 1));
         return $rest;
     }
 
@@ -106,5 +98,14 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
 
 function vector(iterable $collection)
 {
+    // ensure contiguous numeric keys by stripping the existing keys
+
+    if ($collection instanceof \Traversable) {
+        $collection = iterator_to_array($collection, false);
+    } else {
+        assert(is_array($collection));
+        $collection = array_values($collection);
+    }
+
     return new Vector($collection);
 }
