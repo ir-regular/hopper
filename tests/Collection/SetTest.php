@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper\Collection;
 
-use IrRegular\Hopper\Collection\Set;
+use function IrRegular\Hopper\Collection\set;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +15,7 @@ class SetTest extends TestCase
     {
         $o1 = new \stdClass();
 
-        $set = new Set([$o1]);
+        $set = set([$o1]);
         $this->assertEquals(1, $set->getCount());
         $this->assertFalse($set->isEmpty());
         $this->assertTrue($set->isKey($o1));
@@ -29,14 +29,14 @@ class SetTest extends TestCase
         $o2 = new \stdClass();
         $o2->name = 'Jack';
 
-        $set = new Set([$o1, $o2, $o1]);
+        $set = set([$o1, $o2, $o1]);
         $this->assertEquals(2, $set->getCount());
     }
 
     public function testCanCreateSetFromIterator()
     {
         $iterator = new \ArrayIterator([1, 2, 3, 1, 2, 3]);
-        $set = new Set($iterator);
+        $set = set($iterator);
 
         $this->assertEquals(3, $set->getCount());
         $this->assertTrue($set->isKey(1));
@@ -46,7 +46,7 @@ class SetTest extends TestCase
 
     public function testCanCreateSetFromNestedArray()
     {
-        $set = new Set(self::$nestedArray);
+        $set = set(self::$nestedArray);
         $this->assertEquals(4, $set->getCount());
         $this->assertTrue($set->isKey(['name' => 'John', 'address' => ['city' => 'New York']]));
     }

@@ -14,18 +14,17 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
     /**
      * @var array
      */
-    public $uniqueIndex = [];
+    protected $uniqueIndex = [];
 
     /**
      * @var array
      */
-    public $array = [];
+    protected $array = [];
 
-    public function __construct(iterable $collection)
+    public function __construct(array $elements, array $uniqueIndex)
     {
-        foreach ($collection as $element) {
-            $this->addElement($element);
-        }
+        $this->array = $elements;
+        $this->uniqueIndex = $uniqueIndex;
     }
 
     public function isEmpty(): bool
@@ -84,11 +83,23 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
 
     public function isKey($key): bool
     {
-        if (!is_valid_array_key($key)) {
-            $key = convert_to_valid_array_key($key);
-        }
+        if (is_object($key) || is_scalar($key)) {
+            // objects or scalars are easy to convert to a string
 
-        return array_key_exists($key, $this->uniqueIndex);
+            if (!is_valid_array_key($key)) {
+                $key = convert_to_valid_array_key($key);
+            }
+
+            assert(is_string($key) || is_int($key));
+
+            return array_key_exists($key, $this->uniqueIndex);
+
+        } else {
+            // we don't really want to convert anything more complicated into a string if we don't have to
+            // so just search for the value
+
+            return (array_search($key, $this->array, true) !== false);
+        }
     }
 
     public function getKeys(): iterable
@@ -100,29 +111,25 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
     {
         return new \ArrayIterator($this->array);
     }
-
-    /**
-     * @param mixed $element
-     * @return bool Whether the element was added to the set or not (because it already existed in it.)
-     */
-    protected function addElement($element): bool
-    {
-        $key = is_valid_array_key($element)
-            ? $element
-            : convert_to_valid_array_key($element);
-
-        $elementAdded = !array_key_exists($key, $this->uniqueIndex);
-
-        if ($elementAdded) {
-            $this->uniqueIndex[$key] = true;
-            $this->array[] = $element;
-        }
-
-        return $elementAdded;
-    }
 }
 
 function set(iterable $collection)
 {
-    return new Set($collection);
+    $elements    = [];
+    $uniqueIndex = [];
+
+    foreach ($collection as $element) {
+        $key = is_valid_array_key($element)
+            ? $element
+            : convert_to_valid_array_key($element);
+
+        $elementAdded = !array_key_exists($key, $uniqueIndex);
+
+        if ($elementAdded) {
+            $uniqueIndex[$key] = true;
+            $elements[] = $element;
+        }
+    }
+
+    return new Set($elements, $uniqueIndex);
 }
