@@ -60,7 +60,7 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
 
     public function map(callable $closure): \Generator
     {
-        foreach ($this->array as $key => $value) {
+        foreach ($this->getKeyValuePairList() as [$key, $value]) {
             yield $key => $closure([$key, $value]);
         }
     }
@@ -73,6 +73,11 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function getCount(): int
     {
         return count($this->array);
+    }
+
+    public function getValues(): iterable
+    {
+        return array_values($this->array);
     }
 
     public function first()

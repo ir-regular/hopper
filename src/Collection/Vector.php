@@ -55,6 +55,11 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
         return count($this->array);
     }
 
+    public function getValues(): iterable
+    {
+        return $this->array;
+    }
+
     public function first()
     {
         assert(!empty($this->array));
