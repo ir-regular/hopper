@@ -11,33 +11,20 @@ use IrRegular\Hopper\Mappable;
 
 class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldable
 {
-    const KEY_PREFIX = 'k_';
+    /**
+     * @var array
+     */
+    protected $index = [];
 
     /**
      * @var array
      */
-    public $index = [];
+    protected $array = [];
 
-    /**
-     * @var array
-     */
-    public $array = [];
-
-    public function __construct(iterable $collection)
+    public function __construct(array $collection, array $stringIndex)
     {
-        if ($collection instanceof \Traversable) {
-            $collection = iterator_to_array($collection, true);
-        }
-
         $this->array = $collection;
-
-        // ensure you can perform operations on string keys
-        // (but also preserve the original keys with appropriate types)
-
-        foreach (array_keys($collection) as $originalKey) {
-            $safeKey = $this->sanitiseKey($originalKey);
-            $this->index[$safeKey] = $originalKey;
-        }
+        $this->index = $stringIndex;
     }
 
     public function foldl(callable $closure, $initialValue)
@@ -83,6 +70,7 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function first()
     {
         assert(!empty($this->array));
+
         $key = array_keys($this->array)[0];
         // $key = array_key_first($this->array); // PHP 7.3
         return [$key, $this->array[$key]];
@@ -91,6 +79,7 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function last()
     {
         assert(!empty($this->array));
+
         $key = array_keys($this->array)[count($this->array) - 1];
         // $key = array_key_last($this->array); // PHP 7.3
         return [$key, $this->array[$key]];
@@ -98,36 +87,38 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
 
     public function rest(): ListAccessible
     {
-        $rest = new HashMap([]);
         // Amazingly, array_slice _does_ work on arrays with string keys. IKR?!
-        $rest->index = array_slice($this->index, 1);
-        $rest->array = array_slice($this->array, 1);
+
+        $rest = new HashMap(
+            array_slice($this->array, 1),
+            array_slice($this->index, 1)
+        );
+
         return $rest;
     }
 
     public function get($key, $default = null)
     {
-        $safeKey = $this->sanitiseKey($key);
-        $key = $this->index[$safeKey] ?? null;
+        if (!is_valid_hash_map_key($key)) {
+            $safeKey = convert_to_valid_array_key($key);
+            $key = $this->index[$safeKey] ?? null;
+        }
+
         return $this->array[$key] ?? $default;
     }
 
     public function isKey($key): bool
     {
-        $safeKey = $this->sanitiseKey($key);
-        return array_key_exists($safeKey, $this->index);
+        if (!is_valid_hash_map_key($key)) {
+            $key = convert_to_valid_array_key($key);
+        }
+
+        return array_key_exists($key, $this->index);
     }
 
     public function getKeys(): iterable
     {
         return array_keys($this->array);
-    }
-
-    protected function sanitiseKey($originalKey): string
-    {
-        // 1. prefix ensures numeric strings don't get cast to numbers
-        // 2. `strval` is safe since it distinguishes between 0 and ''
-        return self::KEY_PREFIX . strval($originalKey);
     }
 
     /**
@@ -149,5 +140,22 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
 
 function hash_map(iterable $collection)
 {
-    return new HashMap($collection);
+    if ($collection instanceof \Traversable) {
+        $collection = iterator_to_array($collection, true);
+    }
+
+    // ensure you can perform operations on string keys
+    // (but also preserve the original keys with appropriate types)
+
+    $stringIndex = [];
+
+    foreach (array_keys($collection) as $originalKey) {
+        $safeKey = is_valid_hash_map_key($originalKey)
+            ? $originalKey
+            : convert_to_valid_array_key($originalKey);
+
+        $stringIndex[$safeKey] = $originalKey;
+    }
+
+    return new HashMap($collection, $stringIndex);
 }

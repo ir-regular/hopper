@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper\Collection;
 
-use IrRegular\Hopper\Collection\HashMap;
+use function IrRegular\Hopper\Collection\hash_map;
 use PHPUnit\Framework\TestCase;
 
 class HashMapTest extends TestCase
@@ -18,7 +18,7 @@ class HashMapTest extends TestCase
             'Greta' => 2,
             'Josh' => 3
         ]);
-        $hashMap = new HashMap($iterator);
+        $hashMap = hash_map($iterator);
 
         $this->assertEquals(6, $hashMap->getCount());
         $this->assertTrue($hashMap->isKey('Mary'));
