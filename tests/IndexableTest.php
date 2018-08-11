@@ -6,6 +6,7 @@ namespace IrRegular\Tests\Hopper;
 use function IrRegular\Hopper\get;
 use function IrRegular\Hopper\get_in;
 use function IrRegular\Hopper\is_key;
+use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\map;
 use function IrRegular\Hopper\partial_first;
 use PHPUnit\Framework\TestCase;
@@ -13,6 +14,17 @@ use PHPUnit\Framework\TestCase;
 class IndexableTest extends TestCase
 {
     use CollectionSetUpTrait;
+
+    public function testCanGetAllCollectionKeys()
+    {
+        $arrayIndices = range(0, 6);
+        $hashMapKeys = array_map('self::encodeKey', $arrayIndices);
+
+        $this->assertEquals($arrayIndices, keys(self::$array));
+        $this->assertEquals($arrayIndices, keys(self::$vector));
+        $this->assertEquals($hashMapKeys, keys(self::$hashMap));
+        $this->assertEquals([1, 2, 4, 3], keys(self::$set));
+    }
 
     public function testCanCheckCollectionContainsKey()
     {

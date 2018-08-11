@@ -91,6 +91,11 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
         return array_key_exists($key, $this->uniqueIndex);
     }
 
+    public function getKeys(): iterable
+    {
+        return $this->array;
+    }
+
     public function getIterator()
     {
         return new \ArrayIterator($this->array);

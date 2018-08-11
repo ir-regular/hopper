@@ -93,6 +93,11 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
         return array_key_exists($key, $this->array);
     }
 
+    public function getKeys(): iterable
+    {
+        return array_keys($this->array);
+    }
+
     public function getIterator()
     {
         return new \ArrayIterator($this->array);

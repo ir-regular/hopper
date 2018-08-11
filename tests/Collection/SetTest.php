@@ -50,4 +50,9 @@ class SetTest extends TestCase
         $this->assertEquals(4, $set->getCount());
         $this->assertTrue($set->isKey(['name' => 'John', 'address' => ['city' => 'New York']]));
     }
+
+    public function testSetKeysEqualSetValues()
+    {
+        $this->assertEquals(self::$set->getKeys(), self::$set->getValues());
+    }
 }

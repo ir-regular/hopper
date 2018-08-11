@@ -118,6 +118,11 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
         return array_key_exists($safeKey, $this->index);
     }
 
+    public function getKeys(): iterable
+    {
+        return array_keys($this->array);
+    }
+
     protected function sanitiseKey($originalKey): string
     {
         // 1. prefix ensures numeric strings don't get cast to numbers
