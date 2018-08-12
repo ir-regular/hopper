@@ -2,7 +2,7 @@
 <ruleset>
     <file>./src</file>
 
-    <rule ref="PSR2">
+    <rule ref="PSR12">
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
     </rule>
