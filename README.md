@@ -29,6 +29,10 @@ Then, `use` the functions so that they become available in your namespace. For e
 
 `use function IrRegular\Hopper\map;`
 
+### Examples
+
+- [Extracting information out of a JSON book catalogue](https://github.com/ir-regular/hopper/blob/master/examples/book-catalog.php)
+
 ## Design choices for the curious
 
 ### Functions and their placement
