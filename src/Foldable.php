@@ -27,7 +27,7 @@ function foldl(callable $closure, $initialValue, iterable $collection)
     } else {
         $carry = $initialValue;
         foreach ($collection as $key => $element) {
-            $values[$key] = $closure($carry, [$key, $element]);
+            $carry = $closure($carry, [$key, $element]);
         }
         return $carry;
     }

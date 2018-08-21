@@ -5,13 +5,13 @@ namespace IrRegular\Tests\Hopper;
 
 use IrRegular\Hopper\Collection;
 
-/**
- * @TODO iterator
- */
 trait CollectionSetUpTrait
 {
     /** @var array */
     private static $array;
+
+    /** @var \Iterator */
+    private static $iterator;
 
     /** @var array */
     private static $nestedArray;
@@ -43,6 +43,8 @@ trait CollectionSetUpTrait
             ['name' => 'Sam', 'address' => ['city' => 'Toronto', 'country' => 'Canada']],
             ['name' => 'Alicia']
         ];
+
+        self::$iterator = new \ArrayIterator(self::$array);
     }
 
     protected static function encodeKey($value): string

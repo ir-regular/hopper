@@ -69,4 +69,19 @@ class FoldableTest extends TestCase
             self::$set
         );
     }
+
+    public function testIteratorIsFoldable()
+    {
+        $this->assertEquals(
+            16,
+            foldl(
+                function ($carry, $item) {
+                    [$_, $value] = $item;
+                    return ($carry + $value);
+                },
+                0,
+                self::$iterator
+            )
+        );
+    }
 }
