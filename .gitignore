@@ -1,3 +1,5 @@
 /bin/*
 /vendor/
 composer.lock
+/examples/resources/*
+!/examples/resources/.gitkeep
