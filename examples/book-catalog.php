@@ -5,7 +5,6 @@ namespace IrRegular\Examples\Hopper\Json;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use function IrRegular\Hopper\Collection\vector;
 use function IrRegular\Hopper\compose;
 use function IrRegular\Hopper\map;
 use function IrRegular\Hopper\partial;
@@ -34,12 +33,6 @@ if (empty($raw)) {
 }
 
 $books = map(partial_first('\json_decode', true), $raw);
-
-// Note that I used `map()`, which currently returns a generator.
-// If you don't apply `\iterator_to_array()`, or realise the generator in some other way (here: through `vector`),
-// $books can be used only once. This is not ideal, and therefore not a final solution.
-
-$books = vector($books);
 
 // Note that if using a namespaced function as a callable string, PHP requires you to provide
 // a fully qualified function name, even if you `use function`.

@@ -10,6 +10,9 @@ trait CollectionSetUpTrait
     /** @var array */
     private static $array;
 
+    /** @var array */
+    private static $stringIndexedArray;
+
     /** @var \Iterator */
     private static $iterator;
 
@@ -29,13 +32,15 @@ trait CollectionSetUpTrait
     {
         self::$array = [1, 2, 1, 4, 3, 1, 4];
 
+        $keys = array_map('self::encodeKey', array_keys(self::$array));
+        self::$stringIndexedArray = array_combine($keys, self::$array);
+
         self::$vector = Collection\vector(self::$array);
 
         // note that $array contains duplicates of the first and last element
         self::$set = Collection\set(self::$array);
 
-        $keys = array_map('self::encodeKey', array_keys(self::$array));
-        self::$hashMap = Collection\hash_map(array_combine($keys, self::$array));
+        self::$hashMap = Collection\hash_map(self::$stringIndexedArray);
 
         self::$nestedArray = [
             ['name' => 'John', 'address' => ['city' => 'New York']],

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
+use function IrRegular\Hopper\Collection\vector;
 use function IrRegular\Hopper\get;
 use function IrRegular\Hopper\get_in;
 use function IrRegular\Hopper\is_key;
@@ -70,8 +71,8 @@ class IndexableTest extends TestCase
         $getCity = partial_first('IrRegular\Hopper\get_in', ['address', 'city'], 'Unknown');
 
         $this->assertEquals(
-            ['New York', 'London', 'Toronto', 'Unknown'],
-            iterator_to_array(map($getCity, self::$nestedArray))
+            vector(['New York', 'London', 'Toronto', 'Unknown']),
+            map($getCity, self::$nestedArray)
         );
     }
 }

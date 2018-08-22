@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
+use function IrRegular\Hopper\Collection\hash_map;
+use function IrRegular\Hopper\Collection\vector;
+use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\map;
 use PHPUnit\Framework\TestCase;
 
@@ -18,27 +21,33 @@ class MappableTest extends TestCase
     public function testArrayIsMappable()
     {
         $this->assertEquals(
-            [2, 3, 2, 5, 4, 2, 5],
-            iterator_to_array(
-                map([$this, 'increment'], self::$array)
-            )
+            vector([2, 3, 2, 5, 4, 2, 5]),
+            map([$this, 'increment'], self::$array)
+        );
+    }
+
+    public function testMappingOverStringIndexedArrayPreservesKeys()
+    {
+        $result = map('\IrRegular\Hopper\identity', self::$stringIndexedArray);
+
+        $this->assertEquals(
+            array_keys(self::$stringIndexedArray),
+            keys($result)
         );
     }
 
     public function testVectorIsMappable()
     {
         $this->assertEquals(
-            [2, 3, 2, 5, 4, 2, 5],
-            iterator_to_array(
-                map([$this, 'increment'], self::$vector)
-            )
+            vector([2, 3, 2, 5, 4, 2, 5]),
+            map([$this, 'increment'], self::$vector)
         );
     }
 
     public function testHashMapIsMappable()
     {
         $this->assertEquals(
-            [
+            hash_map([
                 'key 0' => 2,
                 'key 1' => 3,
                 'key 2' => 2,
@@ -46,10 +55,8 @@ class MappableTest extends TestCase
                 'key 4' => 4,
                 'key 5' => 2,
                 'key 6' => 5
-            ],
-            iterator_to_array(
-                map([$this, 'increment'], self::$hashMap)
-            )
+            ]),
+            map([$this, 'increment'], self::$hashMap)
         );
     }
 
@@ -60,6 +67,6 @@ class MappableTest extends TestCase
     {
         // note that this only throws after the generator has been first accessed
         // thus the need for `iterator_to_array`
-        iterator_to_array(map([$this, 'increment'], self::$set));
+        map([$this, 'increment'], self::$set);
     }
 }
