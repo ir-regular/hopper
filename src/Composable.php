@@ -13,6 +13,19 @@ namespace IrRegular\Hopper;
  */
 
 /**
+ * Returns the same value it was passed.
+ *
+ * Attn: pass-by-value, not reference; copying will occur.
+ *
+ * @param mixed $x
+ * @return mixed
+ */
+function identity($x)
+{
+    return $x;
+}
+
+/**
  * Returns a function that transforms its input by applying each of $functions in turn.
  *
  * @param callable ...$functions

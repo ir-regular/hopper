@@ -5,6 +5,7 @@ namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\apply;
 use function IrRegular\Hopper\compose;
+use function IrRegular\Hopper\identity;
 use function IrRegular\Hopper\partial;
 use function IrRegular\Hopper\partial_first;
 use function IrRegular\Hopper\partial_last;
@@ -55,5 +56,17 @@ class ComposableTest extends TestCase
         $snakeCase = partial('implode', '_');
 
         $this->assertEquals('key_value', apply($snakeCase, 'key', 'value'));
+    }
+
+    public function testIdentity()
+    {
+        $x = 1;
+        $this->assertEquals($x, identity($x));
+
+        $x = [1, 2, 3];
+        $this->assertEquals($x, identity($x));
+
+        $x = new \ArrayObject($x);
+        $this->assertEquals($x, identity($x));
     }
 }
