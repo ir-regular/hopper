@@ -106,6 +106,10 @@ function vector(iterable $collection)
         return $collection->toVector();
     }
 
+    if ($collection instanceof \Generator) {
+        return new LazyVector($collection);
+    }
+
     // ensure contiguous numeric keys by stripping the existing keys
 
     if ($collection instanceof \Traversable) {

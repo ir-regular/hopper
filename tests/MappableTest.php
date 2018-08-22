@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\Collection\hash_map;
-use function IrRegular\Hopper\Collection\vector;
+use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\map;
+use function IrRegular\Hopper\values;
 use PHPUnit\Framework\TestCase;
 
 class MappableTest extends TestCase
@@ -21,8 +22,8 @@ class MappableTest extends TestCase
     public function testArrayIsMappable()
     {
         $this->assertEquals(
-            vector([2, 3, 2, 5, 4, 2, 5]),
-            map([$this, 'increment'], self::$array)
+            [2, 3, 2, 5, 4, 2, 5],
+            values(map([$this, 'increment'], self::$array))
         );
     }
 
@@ -39,8 +40,8 @@ class MappableTest extends TestCase
     public function testVectorIsMappable()
     {
         $this->assertEquals(
-            vector([2, 3, 2, 5, 4, 2, 5]),
-            map([$this, 'increment'], self::$vector)
+            [2, 3, 2, 5, 4, 2, 5],
+            values(map([$this, 'increment'], self::$vector))
         );
     }
 
@@ -66,7 +67,23 @@ class MappableTest extends TestCase
     public function testSetIsNotMappable()
     {
         // note that this only throws after the generator has been first accessed
-        // thus the need for `iterator_to_array`
-        map([$this, 'increment'], self::$set);
+        // thus the need for `values`
+        values(map([$this, 'increment'], self::$set));
+    }
+
+    public function testMapOnGeneratorIsLazy()
+    {
+        $generator = $this->generator(self::$array);
+
+        $result = map([$this, 'increment'], $generator);
+        // consume and increment the first element in generator
+        $firstIncremented = first($result);
+
+        // confirm we got the correct element (used to be 1, after increment is 2)
+        $this->assertEquals(2, $firstIncremented);
+        // ...and generator still has more elements
+        $this->assertTrue($generator->valid());
+        // ...and the next element available is 2, so only one element has been realised/consumed
+        $this->assertEquals(2, $generator->current());
     }
 }

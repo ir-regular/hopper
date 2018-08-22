@@ -56,4 +56,15 @@ trait CollectionSetUpTrait
     {
         return "key $value";
     }
+
+    /**
+     * Helper function, returns a customised generator for tests.
+     *
+     * @param array $array
+     * @return \Generator
+     */
+    protected function generator(array $array = []): \Generator
+    {
+        yield from $array;
+    }
 }
