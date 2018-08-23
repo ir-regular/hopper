@@ -161,6 +161,10 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
  */
 function hash_map(iterable $collection, iterable $keys = null)
 {
+    if ($collection instanceof \Generator) {
+        return new LazyHashMap($collection);
+    }
+
     if ($collection instanceof \Traversable) {
         $collection = iterator_to_array($collection, true);
     }
