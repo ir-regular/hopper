@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper\Collection;
 
+use function IrRegular\Hopper\Collection\hash_map;
+use function IrRegular\Hopper\Collection\set;
 use function IrRegular\Hopper\Collection\vector;
 use PHPUnit\Framework\TestCase;
 
@@ -25,5 +27,19 @@ class VectorTest extends TestCase
         $this->assertEquals(3, $vector->getCount());
         $this->assertEquals([0, 1, 2], $vector->getKeys());
         $this->assertEquals(['a', 'b', 'e'], $vector->getValues());
+    }
+
+    public function testCanCreateVectorFromHashMap()
+    {
+        $hashMap = hash_map([1, 2], ['one', 'two']);
+        $vector = vector($hashMap);
+        $this->assertEquals([['one', 1], ['two', 2]], $vector->getValues());
+    }
+
+    public function testCanCreateVectorFromSet()
+    {
+        $set = set([1, 2, 1]);
+        $vector = vector($set);
+        $this->assertEquals([1, 2], $vector->getValues());
     }
 }

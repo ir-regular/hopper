@@ -49,7 +49,11 @@ $books = vector($books);
 
 $pluckCategories = compose(
     partial('\IrRegular\Hopper\map', partial_first('\IrRegular\Hopper\get', 'categories', [])),
-    partial('\IrRegular\Hopper\foldl', '\array_merge', []),
+    // why not just '\array_merge'?
+    // because foldl run over an iterator provides third argument, $key, and array_merge would attempt to merge it
+    partial('\IrRegular\Hopper\foldl', function ($carry, $value) {
+        return array_merge($carry, $value);
+    }, []),
     partial('\IrRegular\Hopper\Collection\set')
 );
 

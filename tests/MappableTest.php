@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
-use function IrRegular\Hopper\compose;
 use function IrRegular\Hopper\map;
 use PHPUnit\Framework\TestCase;
 
@@ -20,7 +19,9 @@ class MappableTest extends TestCase
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            iterator_to_array(map([$this, 'increment'], self::$array))
+            iterator_to_array(
+                map([$this, 'increment'], self::$array)
+            )
         );
     }
 
@@ -28,7 +29,9 @@ class MappableTest extends TestCase
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            iterator_to_array(map([$this, 'increment'], self::$vector))
+            iterator_to_array(
+                map([$this, 'increment'], self::$vector)
+            )
         );
     }
 
@@ -44,13 +47,9 @@ class MappableTest extends TestCase
                 'key 5' => 2,
                 'key 6' => 5
             ],
-            iterator_to_array(map(
-                compose(
-                    'IrRegular\Hopper\second',
-                    [$this, 'increment']
-                ),
-                self::$hashMap
-            ))
+            iterator_to_array(
+                map([$this, 'increment'], self::$hashMap)
+            )
         );
     }
 

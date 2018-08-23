@@ -31,8 +31,10 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function foldl(callable $closure, $initialValue)
     {
         return array_reduce(
-            $this->getKeyValuePairList(),
-            $closure,
+            $this->getValueKeyPairList(),
+            function ($carry, $pair) use ($closure) {
+                return $closure($carry, ...$pair);
+            },
             $initialValue
         );
     }
@@ -40,16 +42,18 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     public function foldr(callable $closure, $initialValue)
     {
         return array_reduce(
-            array_reverse($this->getKeyValuePairList()),
-            $closure,
+            array_reverse($this->getValueKeyPairList()),
+            function ($carry, $pair) use ($closure) {
+                return $closure($carry, ...$pair);
+            },
             $initialValue
         );
     }
 
     public function map(callable $closure): \Generator
     {
-        foreach ($this->getKeyValuePairList() as [$key, $value]) {
-            yield $key => $closure([$key, $value]);
+        foreach ($this->getValueKeyPairList() as $pair) {
+            yield $pair[1] => $closure(...$pair);
         }
     }
 
@@ -126,19 +130,23 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
     }
 
     /**
-     * Returns an (eagerly generated) array of [key, value] pairs of original array.
+     * Returns an (eagerly generated) array of [value, key] pairs of original array.
      *
      * @return array
      */
-    protected function getKeyValuePairList(): array
+    protected function getValueKeyPairList(): array
     {
-        return array_map(null, $this->index, $this->array);
+        return array_map(null, $this->array, $this->index);
     }
 
     public function getIterator()
     {
-        // key-value pairs
-        return new \ArrayIterator($this->getKeyValuePairList());
+        return new \ArrayIterator($this->array);
+    }
+
+    public function toVector(): Vector
+    {
+        return new Vector(array_map(null, $this->index, $this->array));
     }
 }
 

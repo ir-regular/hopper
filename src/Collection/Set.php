@@ -111,6 +111,11 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
     {
         return new \ArrayIterator($this->array);
     }
+
+    public function toVector()
+    {
+        return new Vector($this->array);
+    }
 }
 
 function set(iterable $collection)

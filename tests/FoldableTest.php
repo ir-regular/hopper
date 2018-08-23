@@ -42,12 +42,15 @@ class FoldableTest extends TestCase
         // Sum every other element of `self::$hashMap`
         // It's way overcomplicated for what it does, but I wanted something that demoed use of keys.
 
+        // Note I'm using foldl rather than foldl1 since the latter will result in weird behaviour:
+        // as it uses first() to get the first value, it'd initialise with a [key,value] element.
+        //
+        // If you _really_ want to foldl1 over hash_map values, use `foldl1($f, values($hm))`
+
         $this->assertEquals(
             9,
             foldl(
-                function ($carry, $item) {
-                    [$key, $value] = $item;
-
+                function ($carry, $value, $key) {
                     return (second(explode(' ', $key)) % 2 == 0)
                         ? $carry + $value
                         : $carry;
@@ -73,11 +76,10 @@ class FoldableTest extends TestCase
     public function testIteratorIsFoldable()
     {
         $this->assertEquals(
-            16,
+            9,
             foldl(
-                function ($carry, $item) {
-                    [$_, $value] = $item;
-                    return ($carry + $value);
+                function ($carry, $value, $key) {
+                    return $carry + ($key % 2 == 0 ? $value : 0);
                 },
                 0,
                 self::$iterator

@@ -27,26 +27,29 @@ class HashMapTest extends TestCase
 
     public function testHashMapWithStringKeys()
     {
-        $hashMap = hash_map(['one' => 'ichi', 'two' => 'ni']);
+        $array = ['one' => 'ichi', 'two' => 'ni'];
+        $hashMap = hash_map($array);
 
         $this->assertFalse($hashMap->isKey(0));
         $this->assertTrue($hashMap->isKey('one'));
-        $this->assertEquals(['one', 'two'], $hashMap->getKeys());
-        $this->assertEquals(['ichi', 'ni'], $hashMap->getValues());
-        $this->assertEquals([['one', 'ichi'], ['two', 'ni']], iterator_to_array($hashMap->getIterator()));
+        $this->assertEquals(array_keys($array), $hashMap->getKeys());
+        $this->assertEquals(array_values($array), $hashMap->getValues());
+        $this->assertEquals($array, iterator_to_array($hashMap->getIterator()));
     }
 
     public function testHashMapWithNumericStringKeys()
     {
-        $hashMap = hash_map(['one', 'two'], ['1', '2']);
+        $values = ['one', 'two'];
+        $keys = ['1', '2'];
+        $hashMap = hash_map($values, $keys);
 
         // would be nice if preserving types worked, but PHP will auto-convert the indices.
 
         $this->assertFalse($hashMap->isKey(1));
         $this->assertTrue($hashMap->isKey('1'));
-        $this->assertTrue(['1', '2'] === $hashMap->getKeys());
-        $this->assertEquals(['one', 'two'], $hashMap->getValues());
-        $this->assertTrue([['1', 'one'], ['2', 'two']] === iterator_to_array($hashMap->getIterator()));
+        $this->assertTrue($keys === $hashMap->getKeys());
+        $this->assertEquals($values, $hashMap->getValues());
+        $this->assertTrue([['1', 'one'], ['2', 'two']] === $hashMap->toVector()->getValues());
         $this->assertTrue(['1', 'one'] === $hashMap->first());
         $this->assertTrue(['2', 'two'] === $hashMap->last());
     }
@@ -60,7 +63,7 @@ class HashMapTest extends TestCase
         $this->assertFalse($hashMap->isKey('1'));
         $this->assertTrue([1, 2] === $hashMap->getKeys());
         $this->assertEquals(['one', 'two'], $hashMap->getValues());
-        $this->assertTrue([[1, 'one'], [2, 'two']] === iterator_to_array($hashMap->getIterator()));
+        $this->assertTrue([[1, 'one'], [2, 'two']] === $hashMap->toVector()->getValues());
         $this->assertTrue([1, 'one'] === $hashMap->first());
         $this->assertTrue([2, 'two'] === $hashMap->last());
     }

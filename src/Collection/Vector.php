@@ -98,6 +98,14 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
 
 function vector(iterable $collection)
 {
+    if ($collection instanceof Vector) {
+        return $collection;
+    } elseif ($collection instanceof HashMap) {
+        return $collection->toVector();
+    } elseif ($collection instanceof Set) {
+        return $collection->toVector();
+    }
+
     // ensure contiguous numeric keys by stripping the existing keys
 
     if ($collection instanceof \Traversable) {

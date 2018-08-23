@@ -25,9 +25,10 @@ function foldl(callable $closure, $initialValue, iterable $collection)
     } elseif (is_array($collection)) {
         return array_reduce($collection, $closure, $initialValue);
     } else {
+        assert($collection instanceof \Traversable);
         $carry = $initialValue;
         foreach ($collection as $key => $element) {
-            $carry = $closure($carry, [$key, $element]);
+            $carry = $closure($carry, $element, $key);
         }
         return $carry;
     }
@@ -60,11 +61,12 @@ function foldr(callable $closure, $initialValue, iterable $collection)
     } elseif (is_array($collection)) {
         return array_reduce(array_reverse($collection), $closure, $initialValue);
     } else {
-        // some kind of iterator
+        assert($collection instanceof \Traversable);
+
         $realisedCollection = [];
 
         foreach ($collection as $key => $element) {
-            $realisedCollection[] = [$key, $element];
+            $realisedCollection[$key] = $element;
         }
 
         return array_reduce(array_reverse($realisedCollection), $closure, $initialValue);
@@ -84,7 +86,7 @@ function foldr1(callable $closure, iterable $collection)
         $realisedCollection = [];
 
         foreach ($collection as $key => $element) {
-            $realisedCollection[] = [$key, $element];
+            $realisedCollection[$key] = $element;
         }
     }
 
