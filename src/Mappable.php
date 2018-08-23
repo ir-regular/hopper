@@ -50,12 +50,7 @@ function map(callable $closure, iterable $collection): iterable
         })();
     }
 
-    // Generators are not reusable. There is no easy caching mechanism that I can use (yet)
-    // because \CachingIterator doesn't work the way you think (you need to `getCache()` and
-    // create a new iterator based on that; otherwise it'll try to rewind the original iterator.)
-    //
-    // Currently, calling `vector` (or `hash_map`) on the generator realises it instantly.
-    // Soon, however...!
+    // Calling `vector()` or `hash_map()` on the generator creates a LazyHashMap or LazyVector
 
     return $collectionConstructor($generator);
 }
