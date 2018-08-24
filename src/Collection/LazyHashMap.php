@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Collection;
 
+use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\ListAccessible;
 
-class LazyHashMap extends HashMap
+class LazyHashMap extends HashMap implements Lazy
 {
     /**
      * @var \Generator
@@ -17,6 +18,11 @@ class LazyHashMap extends HashMap
         parent::__construct([], []);
 
         $this->lazyTail = $lazyTail;
+    }
+
+    public function getGenerator(): \Generator
+    {
+        return $this->lazyTail;
     }
 
     public function foldl(callable $closure, $initialValue)
@@ -39,11 +45,15 @@ class LazyHashMap extends HashMap
         return parent::foldr($closure, $initialValue);
     }
 
-    public function map(callable $closure): \Generator
+    public function map(callable $closure): Lazy
     {
-        foreach ($this->getIterator() as $key => $item) {
-            yield $key => $closure($item, $key);
-        }
+        $generator = (function () use ($closure) {
+            foreach ($this->getIterator() as $key => $item) {
+                yield $key => $closure($item, $key);
+            }
+        })();
+
+        return new LazyHashMap($generator);
     }
 
     public function isEmpty(): bool
@@ -113,30 +123,27 @@ class LazyHashMap extends HashMap
 
     public function getIterator()
     {
-        $elementCount = 1;
-
-        // Why did I use this loop condition, rather than just foreach or something?
-        // It's because this is a generator. By yielding, we're gonna lose control over the state of
-        // $this->lazyTail and $this->array and some other code might advance them in the meantime.
-        // So we always need to re-check how many elements $this->array has after we regain control.
-
-        while ((count($this->array) > $elementCount) // => the element has been already realised
-            || ($this->ensureRealisedAtLeast($elementCount) > 0) // => or we realised at least 1 element
-        ) {
-            $item = array_slice($this->array, $elementCount - 1, 1);
+        if ($this->realiseFirstElement()) {
+            $item = array_slice($this->array, 0, 1);
             yield key($item) => current($item);
-            $elementCount++;
+
+            $current = 0;
+
+            while ($this->realiseElementAfter($current)) {
+                $item = array_slice($this->array, ++$current, 1);
+                yield key($item) => current($item);
+            }
         }
     }
 
     /**
      * Realise all remaining elements of generator.
      *
-     * @return int How many elements have been realised during this call.
+     * @return void
      */
-    protected function realise(): int
+    protected function realise(): void
     {
-        return $this->realiseUntil(function () {
+        $this->realiseUntil(function () {
             return false;
         });
     }
@@ -145,14 +152,14 @@ class LazyHashMap extends HashMap
      * Ensure at least first N elements of generator have been realised (where N > 0).
      *
      * @param int $elementCount
-     * @return int How many elements have been realised during this call.
+     * @return void
      */
-    protected function ensureRealisedAtLeast(int $elementCount): int
+    protected function ensureRealisedAtLeast(int $elementCount): void
     {
         assert($elementCount > 0);
         $elementsToAdd = $elementCount - count($this->array);
 
-        return $this->realiseUntil(function () use ($elementsToAdd) {
+        $this->realiseUntil(function () use ($elementsToAdd) {
             static $elementsAdded = 0;
             return ($elementsAdded++ === $elementsToAdd); // increment _after_; we don't want to stop on 0th call
         });
@@ -162,11 +169,11 @@ class LazyHashMap extends HashMap
      * Realise elements of generator until you encounter one with key equal to $safeLookupKey.
      *
      * @param string $safeLookupKey
-     * @return int How many elements have been realised during this call.
+     * @return void
      */
-    protected function realiseUpTo(string $safeLookupKey): int
+    protected function realiseUpTo(string $safeLookupKey): void
     {
-        return $this->realiseUntil(function ($safeKey) use ($safeLookupKey) {
+        $this->realiseUntil(function ($safeKey) use ($safeLookupKey) {
             return ($safeKey !== null) && ($safeKey === $safeLookupKey);
         });
     }
@@ -175,33 +182,74 @@ class LazyHashMap extends HashMap
      * Realise and cache elements of generator until $predicate($safeKey) returns true, or until generator runs out.
      *
      * @param callable $isDone
-     * @return int How many elements have been realised during this call.
+     * @return void
      */
-    protected function realiseUntil(callable $isDone): int
+    protected function realiseUntil(callable $isDone): void
     {
-        $safeKey = null;
-        $elementsAdded = 0;
+        if ($this->realiseFirstElement()) {
+            $current = 0;
+            // $safeKey = array_key_first($this->index); // PHP 7.3
+            $safeKey = array_keys($this->index)[0];
 
-        $values = [];
-        $stringIndex = [];
+            while (!$isDone($safeKey) && $this->realiseElementAfter($current)) {
+                $item = array_slice($this->index, ++$current, 1);
+                $safeKey = key($item);
+            }
+        }
+    }
 
-        while ($this->lazyTail->valid() && !$isDone($safeKey)) {
-            $originalKey = $this->lazyTail->key();
+    /**
+     * Ensure the first element of the generator is realised.
+     *
+     * @return bool Whether 0th element now exists (false means generator's finished.)
+     */
+    protected function realiseFirstElement(): bool
+    {
+        if (count($this->array) == 0) {
+            if ($this->lazyTail->valid()) {
+                $originalKey = $this->lazyTail->key();
+                $safeKey = is_valid_hash_map_key($originalKey)
+                    ? $originalKey
+                    : convert_to_valid_hash_map_key($originalKey);
 
-            $safeKey = is_valid_hash_map_key($originalKey)
-                ? $originalKey
-                : convert_to_valid_hash_map_key($originalKey);
-
-            $stringIndex[$safeKey] = $originalKey;
-            $values[$originalKey] = $this->lazyTail->current();
-
-            $this->lazyTail->next();
-            $elementsAdded++;
+                $this->index[$safeKey] = $originalKey;
+                $this->array[$originalKey] = $this->lazyTail->current();
+            } else {
+                return false;
+            }
         }
 
-        $this->array = array_merge($this->array, $values);
-        $this->index = array_merge($this->index, $stringIndex);
+        return true;
+    }
 
-        return $elementsAdded;
+    /**
+     * Ensure the next element after $current is realised.
+     *
+     * Note that this assumes all elements in range (0;$current) have been realised.
+     *
+     * @param int $current
+     * @return bool Whether $current+1 element now exists (false means generator's finished.)
+     */
+    protected function realiseElementAfter(int $current): bool
+    {
+        assert($current >= 0);
+
+        if (count($this->array) == $current + 1) {
+            $this->lazyTail->next();
+
+            if ($this->lazyTail->valid()) {
+                $originalKey = $this->lazyTail->key();
+                $safeKey = is_valid_hash_map_key($originalKey)
+                    ? $originalKey
+                    : convert_to_valid_hash_map_key($originalKey);
+
+                $this->index[$safeKey] = $originalKey;
+                $this->array[$safeKey] =  $this->lazyTail->current();
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

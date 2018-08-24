@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\first;
+use function IrRegular\Hopper\get;
 use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\map;
+use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
 use PHPUnit\Framework\TestCase;
 
@@ -82,7 +84,11 @@ class MappableTest extends TestCase
         $this->assertEquals(2, $firstIncremented);
         // ...and generator still has more elements
         $this->assertTrue($generator->valid());
-        // ...and the next element available is 2, so only one element has been realised/consumed
+        // ...and only the first element has been realised, no need to move the generator forward
+        $this->assertEquals(1, $generator->current());
+
+        // ...but after we retrieve the second element of sequence
+        $this->assertEquals(3, second($result));
+        // ...now the current element available is 2; only consume as many elements as neceesary!
         $this->assertEquals(2, $generator->current());
-    }
-}
+    }}

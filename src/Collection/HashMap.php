@@ -6,6 +6,7 @@ namespace IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
+use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 use function IrRegular\Hopper\size;
@@ -50,11 +51,15 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
         );
     }
 
-    public function map(callable $closure): \Generator
+    public function map(callable $closure): Lazy
     {
-        foreach ($this->getValueKeyPairList() as $pair) {
-            yield $pair[1] => $closure(...$pair);
-        }
+        $generator = (function () use ($closure) {
+            foreach ($this->getValueKeyPairList() as $pair) {
+                yield $pair[1] => $closure(...$pair);
+            }
+        })();
+
+        return new LazyHashMap($generator);
     }
 
     public function isEmpty(): bool

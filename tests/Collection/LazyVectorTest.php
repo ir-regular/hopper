@@ -5,6 +5,9 @@ namespace IrRegular\Tests\Hopper\Collection;
 
 use IrRegular\Hopper\Collection\LazyVector;
 use function IrRegular\Hopper\Collection\vector;
+use function IrRegular\Hopper\first;
+use function IrRegular\Hopper\get;
+use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
@@ -34,16 +37,12 @@ class LazyVectorTest extends TestCase
 
     public function testMapIsLazy()
     {
-        $g = $this->generator([1, 2, 3]);
+        $g = $this->generator([1, 2]);
         $vector = vector($g);
         $result = $vector->map([$this, 'increment']);
 
-        $this->assertEquals(2, $result->current());
-        $result->next();
-        $this->assertEquals(3, $result->current());
-
-        // $result never instantiates more elements of input generator
-        // than necessary to generate results
+        $this->assertEquals(2, first($result));
+        $this->assertEquals(3, second($result));
 
         $this->assertTrue($g->valid());
     }
@@ -111,5 +110,33 @@ class LazyVectorTest extends TestCase
         $this->assertInstanceOf(LazyVector::class, $rest);
         $this->assertEquals([2], values($rest));
         $this->assertEquals([1, 2], $vector->getValues());
+    }
+
+    public function testDeeplyNestedVectorsHaveNoSkew()
+    {
+        /** @var \Generator $generator */
+        $generator = (function () {
+            yield from [1, 2, 3, 4];
+        })();
+
+        /** @var LazyVector $v1 */
+        $v1 = \IrRegular\Hopper\map('\IrRegular\Hopper\identity', $generator);
+        /** @var LazyVector $v2 */
+        $v2 = \IrRegular\Hopper\map('\IrRegular\Hopper\identity', $v1);
+        /** @var LazyVector $v3 */
+        $v3 = \IrRegular\Hopper\map('\IrRegular\Hopper\identity', $v2);
+
+        $this->assertEquals(1, get($v3, 0));
+        $this->assertEquals(1, $generator->current());
+        $this->assertEquals(1, $v1->getGenerator()->current());
+        $this->assertEquals(1, $v2->getGenerator()->current());
+        $this->assertEquals(1, $v3->getGenerator()->current());
+
+        $this->assertEquals(2, get($v3, 1));
+        $this->assertEquals(3, get($v3, 2));
+        $this->assertEquals(4, get($v3, 3));
+
+        $this->assertEquals(4, $generator->current());
+        $this->assertEquals('default', get($v3, 4, 'default'));
     }
 }

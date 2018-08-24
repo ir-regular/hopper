@@ -6,6 +6,7 @@ namespace IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
+use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
@@ -56,7 +57,7 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
         throw new \BadMethodCallException('Set does not have a defined access order: cannot fold');
     }
 
-    public function map(callable $closure): \Generator
+    public function map(callable $closure): Lazy
     {
         throw new \BadMethodCallException('Set does not have a defined access order: cannot map');
     }

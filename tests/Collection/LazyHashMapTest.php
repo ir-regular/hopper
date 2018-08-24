@@ -5,7 +5,9 @@ namespace IrRegular\Tests\Hopper\Collection;
 
 use function IrRegular\Hopper\Collection\hash_map;
 use IrRegular\Hopper\Collection\LazyHashMap;
+use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
+use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
@@ -97,12 +99,12 @@ class LazyHashMapTest extends TestCase
         $hashMap = hash_map($g);
         $result = $hashMap->map([$this, 'increment']);
 
-        $this->assertEquals(2, $result->current());
-        $result->next();
-        $this->assertEquals(3, $result->current());
+        $this->assertEquals(['one', 2], first($result));
+        $this->assertEquals(['two', 3], second($result)); // @TODO this fails, interesting
 
         // $result never instantiates more elements of input generator
         // than necessary to generate results
+        // @TODO (actually now it does and I don't know why)
 
         $this->assertTrue($g->valid());
     }
@@ -115,9 +117,8 @@ class LazyHashMapTest extends TestCase
 
         $result = $hashMap->map([$this, 'increment']);
 
-        $this->assertEquals(2, $result->current());
-        $result->next();
-        $this->assertEquals(3, $result->current());
+        $this->assertEquals(['key 0', 2], first($result));
+        $this->assertEquals(['key 1', 3], second($result)); // @TODO also fails
     }
 
     public function testRestReturnsLazyHashMap()

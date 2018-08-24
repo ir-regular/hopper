@@ -3,12 +3,22 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Collection;
 
+use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\ListAccessible;
 
-class LazyVector extends Vector
+/**
+ *  Note how this class manually iterates over the generator.
+ *
+ * `iterator_to_array` and `foreach` attempt to rewind the iterator at the start.
+ *
+ * If you attempted to use them on $this->lazyTail after some other method partially
+ * realised it, you'd get an error: "Cannot rewind a generator that was already run".
+ * Thus, everything uses current(), next(), and valid() methods of Iterator.
+ */
+class LazyVector extends Vector implements Lazy
 {
     /**
-     * @var \Iterator
+     * @var \Generator
      */
     protected $lazyTail;
 
@@ -17,6 +27,11 @@ class LazyVector extends Vector
         parent::__construct([]);
 
         $this->lazyTail = $lazyTail;
+    }
+
+    public function getGenerator(): \Generator
+    {
+        return $this->lazyTail;
     }
 
     public function foldl(callable $closure, $initialValue)
@@ -31,11 +46,15 @@ class LazyVector extends Vector
         return parent::foldr($closure, $initialValue);
     }
 
-    public function map(callable $closure): \Generator
+    public function map(callable $closure): Lazy
     {
-        foreach ($this->getIterator() as $value) {
-            yield $closure($value);
-        }
+        $generator = (function () use ($closure) {
+            foreach ($this->getIterator() as $value) {
+                yield $closure($value);
+            }
+        })();
+
+        return new LazyVector($generator);
     }
 
     public function isEmpty(): bool
@@ -57,7 +76,7 @@ class LazyVector extends Vector
 
     public function first()
     {
-        $this->realiseUpTo(0);
+        $this->realiseFirstElement();
         return parent::first();
     }
 
@@ -77,17 +96,19 @@ class LazyVector extends Vector
 
     public function get($key, $default = null)
     {
-        assert(is_int($key));
+        assert(is_int($key) && $key >= 0);
 
-        $this->realiseUpTo($key);
-        return parent::get($key, $default);
+        $this->realise($key);
+
+        return $this->array[$key] ?? $default;
     }
 
     public function isKey($key): bool
     {
-        assert(is_int($key));
+        assert(is_int($key) && $key >= 0);
 
-        $this->realiseUpTo($key);
+        $this->realise($key);
+
         return parent::isKey($key);
     }
 
@@ -99,54 +120,82 @@ class LazyVector extends Vector
 
     public function getIterator()
     {
-        // Note that I'm not using a foreach loop here, or calling $this->lazyTail->next().
-        // After this method `yield`s, someone might increment the generator using other methods.
-        // `realiseUpTo()` will only increment the generator if the element hasn't been realised yet.
-        //
-        // Furthermore, `realiseUpTo()` will return 1 if found, 0 if no more elements found
-        // (either from array or generator), so it works as a loop break condition.
+        if ($this->realiseFirstElement()) {
+            yield $this->array[0];
 
-        $index = 0;
+            $current = 0;
 
-        while (array_key_exists($index, $this->array) || $this->realiseUpTo($index)) {
-            yield $this->array[$index];
-            $index++;
+            while ($this->realiseElementAfter($current)) {
+                yield $this->array[++$current];
+            }
         }
     }
 
-    protected function realise(): int
+    /**
+     * Realise elements until and including $index
+     *
+     * If $index is null: realise all remaining elements.
+     *
+     * @param int|null $index
+     * @return void
+     */
+    protected function realise(?int $index = null)
     {
-        $elementsAdded = 0;
+        $this->realiseFirstElement();
 
-        // If you try to use `iterator_to_array` in here, and something's already touched
-        //  $this->lazyTail, you'll get "Cannot rewind a generator that was already run"
+        $current = 0;
 
-        while ($this->lazyTail->valid()) {
-            $this->array[] = $this->lazyTail->current();
-            $this->lazyTail->next();
-            $elementsAdded++;
+        if (is_null($index)) {
+            while ($this->realiseElementAfter($current)) {
+                $current++;
+            }
+        } else {
+            while ($current < $index && $this->realiseElementAfter($current)) {
+                $current++;
+            }
         }
-
-        return $elementsAdded;
     }
 
-    protected function realiseUpTo(int $index): int
+    /**
+     * Ensure the first element of the generator is realised.
+     *
+     * @return bool Whether 0th element now exists (false means generator's finished.)
+     */
+    protected function realiseFirstElement(): bool
     {
-        $elementsAdded = 0;
-
-        if (!array_key_exists($index, $this->array) && $this->lazyTail->valid()) {
-            $elementsToAdd = ($index + 1) - count($this->array);
-
-            // Note: we have to constantly check if the generator is still valid;
-            // it is entirely possible that it has less than $elementsToAdd left.
-
-            for ($i = 0; ($i < $elementsToAdd) && $this->lazyTail->valid(); $i++) {
+        if (!array_key_exists(0, $this->array)) {
+            if ($this->lazyTail->valid()) {
                 $this->array[] = $this->lazyTail->current();
-                $this->lazyTail->next();
-                $elementsAdded++;
+            } else {
+                return false;
             }
         }
 
-        return $elementsAdded;
+        return true;
+    }
+
+    /**
+     * Ensure the next element after $current is realised.
+     *
+     * Note that this assumes all elements in range (0;$current) have been realised.
+     *
+     * @param int $current
+     * @return bool Whether $current+1 element now exists (false means generator's finished.)
+     */
+    protected function realiseElementAfter(int $current): bool
+    {
+        assert($current >= 0);
+
+        if (!array_key_exists($current + 1, $this->array)) {
+            $this->lazyTail->next();
+
+            if ($this->lazyTail->valid()) {
+                $this->array[] = $this->lazyTail->current();
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

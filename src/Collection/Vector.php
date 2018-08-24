@@ -6,6 +6,7 @@ namespace IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
+use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\ListAccessible;
 use IrRegular\Hopper\Mappable;
 
@@ -31,11 +32,15 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
         return array_reduce(array_reverse($this->array), $closure, $initialValue);
     }
 
-    public function map(callable $closure): \Generator
+    public function map(callable $closure): Lazy
     {
-        foreach ($this->array as $value) {
-            yield $closure($value);
-        }
+        $generator = (function () use ($closure) {
+            foreach ($this->array as $value) {
+                yield $closure($value);
+            }
+        })();
+
+        return new LazyVector($generator);
     }
 
     public function isEmpty(): bool
