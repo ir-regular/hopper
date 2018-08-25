@@ -9,11 +9,19 @@ use function IrRegular\Hopper\identity;
 use function IrRegular\Hopper\partial;
 use function IrRegular\Hopper\partial_first;
 use function IrRegular\Hopper\partial_last;
+use function IrRegular\Hopper\pipe_first;
+use function IrRegular\Hopper\pipe_last;
+use function IrRegular\Hopper\values;
 use PHPUnit\Framework\TestCase;
 
 class ComposableTest extends TestCase
 {
     use CollectionSetUpTrait;
+
+    public function increment(int $x, int $by = 1): int
+    {
+        return $x + $by;
+    }
 
     public function testCompose()
     {
@@ -68,5 +76,39 @@ class ComposableTest extends TestCase
 
         $x = new \ArrayObject($x);
         $this->assertEquals($x, identity($x));
+    }
+
+    public function testPipeFirst()
+    {
+        // can compose callables
+
+        $pipe = pipe_first(
+            '\IrRegular\Hopper\identity',
+            '\IrRegular\Hopper\identity'
+        );
+
+        $this->assertEquals(1, $pipe(1));
+
+        // can also compose callables with args
+
+        $pipe = pipe_first(
+            [$this, 'increment'],
+            [$this, 'increment'],
+            [[$this, 'increment'], 2]
+        );
+
+        $this->assertEquals(5, $pipe(1));
+    }
+
+    public function testPipeLast()
+    {
+        $values = [1, 2, 3];
+
+        $pipe = pipe_last(
+            ['\IrRegular\Hopper\map', [$this, 'increment']],
+            ['\IrRegular\Hopper\map', partial_first([$this, 'increment'], 2)]
+        );
+
+        $this->assertEquals([4, 5, 6], values($pipe($values)));
     }
 }
