@@ -4,53 +4,52 @@ declare(strict_types=1);
 namespace IrRegular\Examples\Hopper\Json;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once 'io.php';
 
-use function IrRegular\Hopper\compose;
 use function IrRegular\Hopper\map;
-use function IrRegular\Hopper\partial;
 use function IrRegular\Hopper\partial_first;
+use function IrRegular\Hopper\pipe_last;
 use function IrRegular\Hopper\size;
+
+// Prep data
 
 $file = 'resources/catalog.books.json';
 $url = 'https://raw.githubusercontent.com/ozlerhakan/mongodb-json-files/master/datasets/catalog.books.json';
 
-if (!is_file($file)) {
-    $fp = fopen($file, "w");
-    $ch = curl_init($url);
-
-    curl_setopt($ch, CURLOPT_FILE, $fp);
-    curl_setopt($ch, CURLOPT_HEADER, false);
-
-    curl_exec($ch);
-    curl_close($ch);
-    fclose($fp);
-}
-
-$raw = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-if (empty($raw)) {
+if (!download_and_cache($url, $file)) {
     exit(-1);
 }
 
+$raw = read_lines($file);
+
+// Have some fun with the data!
+
 $books = map(partial_first('\json_decode', true), $raw);
 
-// Note that if using a namespaced function as a callable string, PHP requires you to provide
-// a fully qualified function name, even if you `use function`.
-// I'm undecided between leaving it and allowing short strings.
-// Fully qualified names have the advantage of PHPStorm (and likely other IDEs) understanding
-// what function they actually refer to.
+printf("\nCatalog contains %d books.\n", size($books));
 
-$pluckCategories = compose(
-    partial('\IrRegular\Hopper\map', partial_first('\IrRegular\Hopper\get', 'categories', [])),
-    // why not just '\array_merge'?
-    // because foldl run over an iterator provides third argument, $key, and array_merge would attempt to merge it
-    partial('\IrRegular\Hopper\foldl', function ($carry, $value) {
-        return array_merge($carry, $value);
-    }, []),
-    partial('\IrRegular\Hopper\Collection\set')
-);
+// why not just use '\array_merge'?
+// because foldl when run over an iterator provides third argument, $key,
+// and array_merge would treat it as a third array and attempt to merge it
 
-$categories = $pluckCategories($books);
+$mergeTwo = function ($array1, $array2) {
+    return array_merge($array1, $array2);
+};
 
-printf("Catalog contains %d books.\n", size($books));
-printf("There are %d unique book categories\n", size($categories));
+$bookAttributes = pipe_last(
+    ['\IrRegular\Hopper\map', '\IrRegular\Hopper\keys'],
+    ['\IrRegular\Hopper\foldl', $mergeTwo, []],
+    '\IrRegular\Hopper\Collection\set',
+    '\IrRegular\Hopper\values'
+)($books);
+
+printf("\nA book record can have the following attributes:\n");
+var_export($bookAttributes);
+
+$categories = pipe_last(
+    ['\IrRegular\Hopper\map', partial_first('\IrRegular\Hopper\get', 'categories', [])],
+    ['\IrRegular\Hopper\foldl', $mergeTwo, []],
+    '\IrRegular\Hopper\Collection\set'
+)($books);
+
+printf("\nThere are %d unique book categories\n", size($categories));

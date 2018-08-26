@@ -45,6 +45,14 @@ Sadly, PHP doesn't support function autoloading at the time of writing ([an RFC 
 All functions are therefore defined in a file that also contains a relevant interface
 used by Collection classes. If you use a Collection class, the file gets autoloaded and therefore functions
 become available. 
+
+### Namespacing library functions
+
+When using a namespaced function as a callable string, PHP requires you to provide
+a fully qualified function name, even if you `use function`. Such is life.
+
+This is inconvenient when composing functions. I'm thinking of ways to allow short strings,
+specifically for library functions. Treat this as a feature under development.
  
 ### Collection classes
 
@@ -59,8 +67,10 @@ into smaller segments.
 
 ### Code development
 
-Code style conforms to [PSR-2](https://www.php-fig.org/psr/psr-2/) with some exceptions that I use
-to increase readability of control structures with complicated conditions.
+Code style conforms to [PSR-2](https://www.php-fig.org/psr/psr-2/)
+and [PSR-12](https://github.com/php-fig/fig-standards/blob/master/proposed/extended-coding-style-guide.md)
+with some exceptions that I use to increase readability of control structures
+with complicated conditions.
 
 Run `composer test` to run unit tests with a condensed report format.
 
