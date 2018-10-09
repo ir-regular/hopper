@@ -5,6 +5,8 @@
     <rule ref="PSR12">
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
+        <exclude name="PSR1.Classes.ClassDeclaration"/>
     </rule>
 
     <!-- space for future rule tweaks -->

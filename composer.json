@@ -19,7 +19,7 @@
   "scripts": {
     "ci": [
       "bin/phpcs",
-      "bin/phpstan analyze --level max ./src",
+      "bin/phpstan analyze -c phpstan.neon --level max ./src",
       "bin/phpunit --testsuite unit --testdox"
     ],
     "test": [
