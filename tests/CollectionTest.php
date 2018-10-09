@@ -9,6 +9,9 @@ use function IrRegular\Hopper\Collection\vector;
 use function IrRegular\Hopper\is_empty;
 use function IrRegular\Hopper\size;
 use function IrRegular\Hopper\values;
+use IrRegular\Hopper\is_empty;
+use IrRegular\Hopper\size;
+use IrRegular\Hopper\values;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
@@ -50,5 +53,12 @@ class CollectionTest extends TestCase
         // Note that currently, set preserves the order in which elements were first inserted.
         // This is however an implementation detail and should not be relied upon.
         $this->assertEquals([1, 2, 4, 3], values(self::$set));
+    }
+
+    public function testCollectionFunctionsHaveFunctionConstantPolyfill()
+    {
+        $this->assertTrue(is_callable(is_empty::function()));
+        $this->assertTrue(is_callable(values::function()));
+        $this->assertTrue(is_callable(size::function()));
     }
 }
