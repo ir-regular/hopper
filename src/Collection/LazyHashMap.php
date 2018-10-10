@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Collection;
 
+use function IrRegular\Hopper\convert_to_valid_hash_map_key;
+use function IrRegular\Hopper\is_valid_hash_map_key;
 use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\ListAccessible;
 

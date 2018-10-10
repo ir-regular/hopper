@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+namespace IrRegular\Hopper;
+
 /**
  * Surprise! There is no Language class or interface.
  *
