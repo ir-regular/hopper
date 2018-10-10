@@ -78,3 +78,30 @@ function get_defined_functions_in_ns(string $namespace, bool $includeSubNs = fal
 
     return array_filter($functions, $filterFn);
 }
+
+function add_function_constant_polyfill_to_ns(string $namespace, bool $includeSubNs = false): void
+{
+    static $template = <<<CLASS
+namespace %ns_name%;
+{
+    class %fn_name%
+    {
+        use \IrRegular\Hopper\FunctionConstantPolyfillTrait;
+    }
+}
+CLASS;
+
+    $templateForNs = str_replace('%ns_name%', $namespace, $template);
+
+    foreach (get_defined_functions_in_ns($namespace, $includeSubNs) as $fn) {
+        $fn = new \ReflectionFunction($fn);
+
+        if ($includeSubNs) {
+            $templateForNs = str_replace('%ns_name%', $fn->getNamespaceName(), $template);
+        }
+
+        $customised = str_replace('%fn_name%', $fn->getShortName(), $templateForNs);
+
+        eval($customised);
+    }
+}
