@@ -49,3 +49,32 @@ function convert_to_valid_hash_map_key($v): string
         return strval($v);
     }
 }
+
+/**
+ * @param string $namespace
+ * @param bool $includeSubNs
+ * @return iterable
+ */
+function get_defined_functions_in_ns(string $namespace, bool $includeSubNs = false): iterable
+{
+    $namespace = rtrim($namespace, '\\');
+
+    $functions = get_defined_functions(true)['user'];
+
+    if ($includeSubNs) {
+        $nsLen = strlen($namespace);
+
+        $filterFn = function ($fn) use ($namespace, $nsLen) {
+            $nsName = (new \ReflectionFunction($fn))->getNamespaceName();
+            return !strncasecmp($nsName, $namespace, $nsLen);
+        };
+
+    } else {
+        $filterFn = function ($fn) use ($namespace) {
+            $nsName = (new \ReflectionFunction($fn))->getNamespaceName();
+            return !strcasecmp($nsName, $namespace);
+        };
+    }
+
+    return array_filter($functions, $filterFn);
+}
