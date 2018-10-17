@@ -36,11 +36,6 @@ function is_empty(iterable $collection): bool
     }
 }
 
-class is_empty
-{
-    use FunctionConstantPolyfillTrait;
-}
-
 /**
  * @param iterable $collection
  * @return int
@@ -55,11 +50,6 @@ function size(iterable $collection): int
         assert(is_array($collection));
         return count($collection);
     }
-}
-
-class size
-{
-    use FunctionConstantPolyfillTrait;
 }
 
 /**
@@ -81,9 +71,4 @@ function values(iterable $collection): iterable
         assert(is_array($collection));
         return array_values($collection);
     }
-}
-
-class values
-{
-    use FunctionConstantPolyfillTrait;
 }

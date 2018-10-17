@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Tests\Hopper;
+namespace IrRegular\Tests\Hopper\Language;
 
-use function IrRegular\Hopper\add_function_constant_polyfill_to_ns;
-use function IrRegular\Hopper\get_defined_functions_in_ns;
+use function IrRegular\Hopper\Language\add_function_constant_polyfill_to_ns;
+use function IrRegular\Hopper\Language\get_defined_functions_in_ns;
 use PHPUnit\Framework\TestCase;
 
 function testSubject()
@@ -16,9 +16,9 @@ class LanguageTest extends TestCase
 {
     public function testListingFunctionsInNamespace()
     {
-        $testSubjectFn = 'irregular\tests\hopper\testsubject';
+        $testSubjectFn = 'irregular\tests\hopper\language\testsubject';
 
-        $fns = get_defined_functions_in_ns('IrRegular\Tests\Hopper');
+        $fns = get_defined_functions_in_ns('IrRegular\Tests\Hopper\Language');
         // strings returned in lowercase, as case is not significant
         $this->assertContains($testSubjectFn, $fns);
 
@@ -32,8 +32,8 @@ class LanguageTest extends TestCase
      */
     public function testAutoPolyfillingFunctionsInNamespace()
     {
-        add_function_constant_polyfill_to_ns('IrRegular\Tests\Hopper');
+        add_function_constant_polyfill_to_ns('IrRegular\Tests\Hopper\Language');
 
-        new \ReflectionClass('IrRegular\Tests\Hopper\testsubject');
+        new \ReflectionClass('IrRegular\Tests\Hopper\Language\testsubject');
     }
 }

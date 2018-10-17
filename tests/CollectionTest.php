@@ -9,9 +9,6 @@ use function IrRegular\Hopper\Collection\vector;
 use function IrRegular\Hopper\is_empty;
 use function IrRegular\Hopper\size;
 use function IrRegular\Hopper\values;
-use IrRegular\Hopper\is_empty;
-use IrRegular\Hopper\size;
-use IrRegular\Hopper\values;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase

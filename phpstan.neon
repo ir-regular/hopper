@@ -1,3 +1,0 @@
-parameters:
-	ignoreErrors:
-		- '#Class [a-zA-Z0-9\\_]+ does not have a constructor and must be instantiated without any parameters.#'
