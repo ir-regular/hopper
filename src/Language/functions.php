@@ -1,11 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper;
+namespace IrRegular\Hopper\Language;
 
 /**
- * Surprise! There is no Language class or interface.
- *
  * This file collects functions that are related to properties of PHP as a language.
  */
 

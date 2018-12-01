@@ -31,7 +31,7 @@
       "IrRegular\\Hopper\\": "src/"
     },
     "files": [
-      "src/Language.php",
+      "src/Language/functions.php",
       "src/Composable.php",
       "src/Collection/HashMap.php",
       "src/Collection/Set.php",
