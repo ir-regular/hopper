@@ -19,7 +19,7 @@
   "scripts": {
     "ci": [
       "bin/phpcs",
-      "bin/phpstan analyze -c phpstan.neon --level max ./src",
+      "bin/phpstan analyze --level max ./src",
       "bin/phpunit --testsuite unit --testdox"
     ],
     "test": [
@@ -31,11 +31,12 @@
       "IrRegular\\Hopper\\": "src/"
     },
     "files": [
-      "src/Language.php",
       "src/Composable.php",
       "src/Collection/HashMap.php",
       "src/Collection/Set.php",
-      "src/Collection/Vector.php"
+      "src/Collection/Vector.php",
+      "src/Language/functions.php",
+      "src/Language/register.php"
     ]
   },
   "autoload-dev": {

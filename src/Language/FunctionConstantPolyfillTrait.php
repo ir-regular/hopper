@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper;
+namespace IrRegular\Hopper\Language;
 
 /**
  * Even after you `use function`, only the fully qualified function name will be recognised as callable.
