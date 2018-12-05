@@ -10,7 +10,7 @@ namespace IrRegular\Hopper;
 function size(iterable $collection): int
 {
     if ($collection instanceof Collection) {
-        return $collection->getCount();
+        return $collection->count();
     } elseif ($collection instanceof \Traversable) {
         return iterator_count($collection);
     } else {

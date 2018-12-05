@@ -6,11 +6,11 @@ namespace IrRegular\Hopper;
 /**
  * Represents a collection that holds elements but does not specify the access method.
  */
-interface Collection
+interface Collection extends \Countable
 {
     public function isEmpty(): bool;
 
-    public function getCount(): int;
+    public function contains($value): bool;
 
     public function getValues(): iterable;
 }
