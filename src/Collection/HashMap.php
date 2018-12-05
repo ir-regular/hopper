@@ -9,9 +9,9 @@ use IrRegular\Hopper\Indexed;
 use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\Sequence;
 use IrRegular\Hopper\Mappable;
-use function IrRegular\Hopper\size;
+use function IrRegular\Hopper\Collection\size;
 
-class HashMap implements Collection, Sequence, Indexed, Mappable, Foldable
+class HashMap implements Collection, Indexed, Foldable, Mappable
 {
     /**
      * @var array
