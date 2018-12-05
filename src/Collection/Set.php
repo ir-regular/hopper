@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Collection;
+use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
+use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\Sequence;
@@ -86,8 +88,8 @@ class Set implements Collection, Foldable, Mappable
         if (is_object($key) || is_scalar($key)) {
             // objects or scalars are easy to convert to a string
 
-            if (!is_valid_hash_map_key($key)) {
-                $key = convert_to_valid_hash_map_key($key);
+            if (!is_valid_key($key)) {
+                $key = convert_to_key($key);
             }
 
             assert(is_string($key) || is_int($key));
@@ -124,9 +126,9 @@ function set(iterable $collection)
     $uniqueIndex = [];
 
     foreach ($collection as $element) {
-        $key = is_valid_hash_map_key($element)
+        $key = is_valid_key($element)
             ? $element
-            : convert_to_valid_hash_map_key($element);
+            : convert_to_key($element);
 
         $elementAdded = !array_key_exists($key, $uniqueIndex);
 

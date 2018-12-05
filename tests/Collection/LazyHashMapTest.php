@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper\Collection;
 
 use function IrRegular\Hopper\Collection\hash_map;
-use IrRegular\Hopper\Collection\LazyHashMap;
+use IrRegular\Hopper\Collection\Lazy;
 use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\second;
@@ -25,7 +25,7 @@ class LazyHashMapTest extends TestCase
     {
         $map = hash_map($this->generator());
 
-        $this->assertInstanceOf(LazyHashMap::class, $map);
+        $this->assertInstanceOf(Lazy::class, $map);
     }
 
     public function testLazyHashMapPreservesItems()
@@ -128,7 +128,7 @@ class LazyHashMapTest extends TestCase
         $hashMap = hash_map($this->generator(['one' => 1, 'two' => 2]));
         $rest = $hashMap->rest();
 
-        $this->assertInstanceOf(LazyHashMap::class, $rest);
+        $this->assertInstanceOf(Lazy::class, $rest);
         $this->assertEquals([2], values($rest));
         $this->assertEquals([1, 2], $hashMap->getValues());
     }

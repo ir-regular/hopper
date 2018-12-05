@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Collection;
+use IrRegular\Hopper\Collection\HashMap\Lazy;
+use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
+use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexed;
-use IrRegular\Hopper\Lazy;
+use IrRegular\Hopper\Lazy as LazyInterface;
 use IrRegular\Hopper\Sequence;
 use IrRegular\Hopper\Mappable;
 use function IrRegular\Hopper\Collection\size;
@@ -51,7 +54,7 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
         );
     }
 
-    public function map(callable $closure): Lazy
+    public function map(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
             foreach ($this->getValueKeyPairList() as $pair) {
@@ -59,7 +62,7 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
             }
         })();
 
-        return new LazyHashMap($generator);
+        return new Lazy($generator);
     }
 
     public function isEmpty(): bool
@@ -111,8 +114,8 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
 
     public function get($key, $default = null)
     {
-        if (!is_valid_hash_map_key($key)) {
-            $safeKey = convert_to_valid_hash_map_key($key);
+        if (!is_valid_key($key)) {
+            $safeKey = convert_to_key($key);
             $key = $this->index[$safeKey] ?? null;
         }
 
@@ -121,8 +124,8 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
 
     public function isKey($key): bool
     {
-        if (!is_valid_hash_map_key($key)) {
-            $key = convert_to_valid_hash_map_key($key);
+        if (!is_valid_key($key)) {
+            $key = convert_to_key($key);
             return array_key_exists($key, $this->index);
         } else {
             return array_key_exists($key, $this->array);
@@ -167,7 +170,7 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
 function hash_map(iterable $collection, iterable $keys = null)
 {
     if ($collection instanceof \Generator) {
-        return new LazyHashMap($collection);
+        return new Lazy($collection);
     }
 
     if ($collection instanceof \Traversable) {
@@ -188,9 +191,9 @@ function hash_map(iterable $collection, iterable $keys = null)
 
     foreach ($collection as $value) {
         $originalKey = current($keys);
-        $safeKey = is_valid_hash_map_key($originalKey)
+        $safeKey = is_valid_key($originalKey)
             ? $originalKey
-            : convert_to_valid_hash_map_key($originalKey);
+            : convert_to_key($originalKey);
 
         $stringIndex[$safeKey] = $originalKey;
         // why not just supply $collection instead of rebuilding it as $values?

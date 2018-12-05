@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection;
+namespace IrRegular\Hopper\Collection\HashMap;
 
-use IrRegular\Hopper\Lazy;
+use IrRegular\Hopper\Collection\HashMap;
+use IrRegular\Hopper\Lazy as LazyInterface;
 use IrRegular\Hopper\Sequence;
 
-class LazyHashMap extends HashMap implements Lazy
+class Lazy extends HashMap implements LazyInterface
 {
     /**
      * @var \Generator
@@ -53,7 +54,7 @@ class LazyHashMap extends HashMap implements Lazy
             }
         })();
 
-        return new LazyHashMap($generator);
+        return new Lazy($generator);
     }
 
     public function isEmpty(): bool
@@ -90,14 +91,14 @@ class LazyHashMap extends HashMap implements Lazy
         $generator = $this->getIterator();
         $generator->next(); // skip the first item
 
-        return new LazyHashMap($generator);
+        return new Lazy($generator);
     }
 
     public function get($key, $default = null)
     {
-        $safeKey = is_valid_hash_map_key($key)
+        $safeKey = is_valid_key($key)
             ? $key
-            : convert_to_valid_hash_map_key($key);
+            : convert_to_key($key);
 
         $this->realiseUpTo($safeKey);
 
@@ -106,9 +107,9 @@ class LazyHashMap extends HashMap implements Lazy
 
     public function isKey($key): bool
     {
-        $safeKey = is_valid_hash_map_key($key)
+        $safeKey = is_valid_key($key)
             ? $key
-            : convert_to_valid_hash_map_key($key);
+            : convert_to_key($key);
 
         $this->realiseUpTo($safeKey);
 
@@ -208,9 +209,9 @@ class LazyHashMap extends HashMap implements Lazy
         if (count($this->array) == 0) {
             if ($this->lazyTail->valid()) {
                 $originalKey = $this->lazyTail->key();
-                $safeKey = is_valid_hash_map_key($originalKey)
+                $safeKey = is_valid_key($originalKey)
                     ? $originalKey
-                    : convert_to_valid_hash_map_key($originalKey);
+                    : convert_to_key($originalKey);
 
                 $this->index[$safeKey] = $originalKey;
                 $this->array[$originalKey] = $this->lazyTail->current();
@@ -239,9 +240,9 @@ class LazyHashMap extends HashMap implements Lazy
 
             if ($this->lazyTail->valid()) {
                 $originalKey = $this->lazyTail->key();
-                $safeKey = is_valid_hash_map_key($originalKey)
+                $safeKey = is_valid_key($originalKey)
                     ? $originalKey
-                    : convert_to_valid_hash_map_key($originalKey);
+                    : convert_to_key($originalKey);
 
                 $this->index[$safeKey] = $originalKey;
                 $this->array[$safeKey] =  $this->lazyTail->current();
