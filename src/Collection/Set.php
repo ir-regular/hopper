@@ -6,6 +6,8 @@ namespace IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Collection;
 use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
 use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
+use IrRegular\Hopper\Ds\Vector;
+use IrRegular\Hopper\Ds\Vector\Eager;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\Sequence;
@@ -114,8 +116,8 @@ class Set implements Collection, Foldable, Mappable
         return new \ArrayIterator($this->array);
     }
 
-    public function toVector()
+    public function toVector(): Vector
     {
-        return new Vector($this->array);
+        return new Eager($this->array);
     }
 }

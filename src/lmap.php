@@ -24,9 +24,9 @@ function lmap(callable $closure, iterable $collection): iterable
     $key = key($collection); // peek at the first key
 
     if (is_null($key) || is_int($key) || ctype_xdigit($key)) {
-        $collectionConstructor = '\IrRegular\Hopper\Collection\vector';
+        $collectionConstructor = '\IrRegular\Hopper\vector';
     } else {
-        $collectionConstructor = '\IrRegular\Hopper\Collection\hash_map';
+        $collectionConstructor = '\IrRegular\Hopper\hash_map';
     }
 
     $generator = (function () use ($closure, $collection) {

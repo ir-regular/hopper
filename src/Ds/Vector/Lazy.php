@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection;
+namespace IrRegular\Hopper\Ds\Vector;
 
-use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\Sequence;
+use IrRegular\Hopper\Ds\Lazy as LazyInterface;
+use IrRegular\Hopper\Ds\Sequence;
 
 /**
  *  Note how this class manually iterates over the generator.
@@ -15,7 +15,7 @@ use IrRegular\Hopper\Sequence;
  * realised it, you'd get an error: "Cannot rewind a generator that was already run".
  * Thus, everything uses current(), next(), and valid() methods of Iterator.
  */
-class LazyVector extends Vector implements Lazy
+class Lazy extends Eager implements LazyInterface
 {
     /**
      * @var \Generator
@@ -46,7 +46,7 @@ class LazyVector extends Vector implements Lazy
         return parent::foldr($closure, $initialValue);
     }
 
-    public function map(callable $closure): Lazy
+    public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
             foreach ($this->getIterator() as $value) {
@@ -54,7 +54,7 @@ class LazyVector extends Vector implements Lazy
             }
         })();
 
-        return new LazyVector($generator);
+        return new Lazy($generator);
     }
 
     public function isEmpty(): bool
@@ -91,7 +91,7 @@ class LazyVector extends Vector implements Lazy
         $generator = $this->getIterator();
         $generator->next(); // skip the first item
 
-        return new LazyVector($generator);
+        return new Lazy($generator);
     }
 
     public function get($key, $default = null)

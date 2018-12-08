@@ -7,6 +7,8 @@ use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Collection\HashMap\Lazy;
 use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
 use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
+use IrRegular\Hopper\Ds\Vector;
+use IrRegular\Hopper\Ds\Vector\Eager;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexed;
 use IrRegular\Hopper\Lazy as LazyInterface;
@@ -154,6 +156,6 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
 
     public function toVector(): Vector
     {
-        return new Vector(array_map(null, $this->index, $this->array));
+        return new Eager(array_map(null, $this->index, $this->array));
     }
 }

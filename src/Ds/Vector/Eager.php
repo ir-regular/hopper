@@ -1,16 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection;
+namespace IrRegular\Hopper\Ds\Vector;
 
-use IrRegular\Hopper\Collection;
-use IrRegular\Hopper\Foldable;
-use IrRegular\Hopper\Indexed;
-use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\Sequence;
-use IrRegular\Hopper\Mappable;
+use IrRegular\Hopper\Ds\Vector as VectorInterface;
+use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 
-class Vector implements Collection, Sequence, Indexed, Mappable, Foldable
+class Eager implements VectorInterface
 {
     /**
      * @var array
@@ -32,7 +28,7 @@ class Vector implements Collection, Sequence, Indexed, Mappable, Foldable
         return array_reduce(array_reverse($this->array), $closure, $initialValue);
     }
 
-    public function map(callable $closure): Lazy
+    public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
             foreach ($this->array as $value) {
@@ -40,7 +36,7 @@ class Vector implements Collection, Sequence, Indexed, Mappable, Foldable
             }
         })();
 
-        return new LazyVector($generator);
+        return new Lazy($generator);
     }
 
     public function isEmpty(): bool
@@ -74,7 +70,7 @@ class Vector implements Collection, Sequence, Indexed, Mappable, Foldable
 
     public function rest(): Sequence
     {
-        $rest = new Vector(array_slice($this->array, 1));
+        $rest = new Eager(array_slice($this->array, 1));
         return $rest;
     }
 

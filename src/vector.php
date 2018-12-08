@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace IrRegular\Hopper;
 
 use IrRegular\Hopper\Collection\HashMap;
-use IrRegular\Hopper\Collection\LazyVector;
 use IrRegular\Hopper\Collection\Set;
-use IrRegular\Hopper\Collection\Vector;
+use IrRegular\Hopper\Ds\Vector\Eager;
+use IrRegular\Hopper\Ds\Vector\Lazy;
 
 function vector(iterable $collection)
 {
-    if ($collection instanceof Vector) {
+    if ($collection instanceof Eager) {
         return $collection;
     } elseif ($collection instanceof HashMap) {
         return $collection->toVector();
@@ -19,7 +19,7 @@ function vector(iterable $collection)
     }
 
     if ($collection instanceof \Generator) {
-        return new LazyVector($collection);
+        return new Lazy($collection);
     }
 
     // ensure contiguous numeric keys by stripping the existing keys
@@ -31,5 +31,5 @@ function vector(iterable $collection)
         $collection = array_values($collection);
     }
 
-    return new Vector($collection);
+    return new Eager($collection);
 }
