@@ -7,10 +7,10 @@ use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\ListAccessible;
+use IrRegular\Hopper\Sequence;
 use IrRegular\Hopper\Mappable;
 
-class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldable
+class Vector implements Collection, Sequence, Indexable, Mappable, Foldable
 {
     /**
      * @var array
@@ -72,7 +72,7 @@ class Vector implements Collection, ListAccessible, Indexable, Mappable, Foldabl
         return $this->array[$key];
     }
 
-    public function rest(): ListAccessible
+    public function rest(): Sequence
     {
         $rest = new Vector(array_slice($this->array, 1));
         return $rest;

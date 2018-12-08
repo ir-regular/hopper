@@ -15,7 +15,7 @@ function last(iterable $collection)
 {
     assert(!is_empty($collection));
 
-    if ($collection instanceof ListAccessible) {
+    if ($collection instanceof Sequence) {
         return $collection->last();
     } elseif ($collection instanceof \Iterator) {
         do {

@@ -13,7 +13,7 @@ function first(iterable $collection)
 {
     assert(!is_empty($collection));
 
-    if ($collection instanceof ListAccessible) {
+    if ($collection instanceof Sequence) {
         return $collection->first();
     } elseif ($collection instanceof \Iterator) {
         return $collection->current();

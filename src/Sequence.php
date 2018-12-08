@@ -8,11 +8,11 @@ namespace IrRegular\Hopper;
  * but that's currently underdeveloped because all the hopper functions prefer interacting
  * with appropriate interface methods from `IrRegular\Hopper` interfaces.
  */
-interface ListAccessible extends \IteratorAggregate
+interface Sequence extends \IteratorAggregate
 {
     public function first();
 
     public function last();
 
-    public function rest(): ListAccessible;
+    public function rest(): Sequence;
 }

@@ -11,7 +11,7 @@ function rest(iterable $collection): iterable
 {
     assert(!is_empty($collection));
 
-    if ($collection instanceof ListAccessible) {
+    if ($collection instanceof Sequence) {
         return $collection->rest();
     } elseif ($collection instanceof \Iterator) {
         $collection->next();

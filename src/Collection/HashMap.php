@@ -7,11 +7,11 @@ use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\ListAccessible;
+use IrRegular\Hopper\Sequence;
 use IrRegular\Hopper\Mappable;
 use function IrRegular\Hopper\size;
 
-class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldable
+class HashMap implements Collection, Sequence, Indexable, Mappable, Foldable
 {
     /**
      * @var array
@@ -97,7 +97,7 @@ class HashMap implements Collection, ListAccessible, Indexable, Mappable, Foldab
         return [$key, $this->array[$key]];
     }
 
-    public function rest(): ListAccessible
+    public function rest(): Sequence
     {
         // Amazingly, array_slice _does_ work on arrays with string keys. IKR?!
 

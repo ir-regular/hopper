@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\ListAccessible;
+use IrRegular\Hopper\Sequence;
 
 /**
  *  Note how this class manually iterates over the generator.
@@ -86,7 +86,7 @@ class LazyVector extends Vector implements Lazy
         return parent::last();
     }
 
-    public function rest(): ListAccessible
+    public function rest(): Sequence
     {
         $generator = $this->getIterator();
         $generator->next(); // skip the first item

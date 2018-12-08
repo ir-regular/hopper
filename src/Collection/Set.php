@@ -7,10 +7,10 @@ use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
 use IrRegular\Hopper\Indexable;
 use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\ListAccessible;
+use IrRegular\Hopper\Sequence;
 use IrRegular\Hopper\Mappable;
 
-class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
+class Set implements Collection, Sequence, Indexable, Mappable, Foldable
 {
     /**
      * @var array
@@ -72,7 +72,7 @@ class Set implements Collection, ListAccessible, Indexable, Mappable, Foldable
         throw new \BadMethodCallException('Set does not have a defined access order: cannot retrieve last');
     }
 
-    public function rest(): ListAccessible
+    public function rest(): Sequence
     {
         throw new \BadMethodCallException('Set does not have a defined access order: cannot retrieve rest');
     }

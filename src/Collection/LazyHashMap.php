@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\ListAccessible;
+use IrRegular\Hopper\Sequence;
 
 class LazyHashMap extends HashMap implements Lazy
 {
@@ -85,7 +85,7 @@ class LazyHashMap extends HashMap implements Lazy
         return parent::last();
     }
 
-    public function rest(): ListAccessible
+    public function rest(): Sequence
     {
         $generator = $this->getIterator();
         $generator->next(); // skip the first item
