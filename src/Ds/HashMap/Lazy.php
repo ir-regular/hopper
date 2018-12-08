@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Hopper\Ds\HashMap;
 
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
-use IrRegular\Hopper\Ds\Sequence;
+use IrRegular\Hopper\Ds\Mappable;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 
@@ -22,51 +22,17 @@ class Lazy extends Eager implements LazyInterface
         $this->lazyTail = $lazyTail;
     }
 
-    public function getGenerator(): \Generator
-    {
-        return $this->lazyTail;
-    }
-
-    public function foldl(callable $closure, $initialValue)
-    {
-        // why not call realise() and parent::foldl() ?
-        // I can likely save on memory by realising elements one by one, and then immediately squashing each into $carry
-
-        $carry = $initialValue;
-
-        foreach ($this->getIterator() as $key => $value) {
-            $carry = $closure($carry, $value, $key);
-        }
-
-        return $carry;
-    }
-
-    public function foldr(callable $closure, $initialValue)
-    {
-        $this->realise();
-        return parent::foldr($closure, $initialValue);
-    }
-
-    public function lMap(callable $closure): LazyInterface
-    {
-        $generator = (function () use ($closure) {
-            foreach ($this->getIterator() as $key => $item) {
-                yield $key => $closure($item, $key);
-            }
-        })();
-
-        return new Lazy($generator);
-    }
+    // Collection
 
     public function isEmpty(): bool
     {
         return empty($this->array) && !$this->lazyTail->valid();
     }
 
-    public function getCount(): int
+    public function count(): int
     {
         $this->realise();
-        return parent::getCount();
+        return parent::count();
     }
 
     public function getValues(): iterable
@@ -75,25 +41,28 @@ class Lazy extends Eager implements LazyInterface
         return parent::getValues();
     }
 
-    public function first()
-    {
-        $this->ensureRealisedAtLeast(1);
-        return parent::first();
-    }
-
-    public function last()
+    public function contains($value): bool
     {
         $this->realise();
-        return parent::last();
+        return parent::contains($value);
     }
 
-    public function rest(): Sequence
+    public function getIterator()
     {
-        $generator = $this->getIterator();
-        $generator->next(); // skip the first item
+        if ($this->realiseFirstElement()) {
+            $item = array_slice($this->array, 0, 1);
+            yield key($item) => current($item);
 
-        return new Lazy($generator);
+            $current = 0;
+
+            while ($this->realiseElementAfter($current)) {
+                $item = array_slice($this->array, ++$current, 1);
+                yield key($item) => current($item);
+            }
+        }
     }
+
+    // Indexed
 
     public function get($key, $default = null)
     {
@@ -123,19 +92,52 @@ class Lazy extends Eager implements LazyInterface
         return parent::getKeys();
     }
 
-    public function getIterator()
+    // Foldable
+
+    public function foldl(callable $closure, $initialValue)
     {
-        if ($this->realiseFirstElement()) {
-            $item = array_slice($this->array, 0, 1);
-            yield key($item) => current($item);
+        // why not call realise() and parent::foldl() ?
+        // I can likely save on memory by realising elements one by one, and then immediately squashing each into $carry
 
-            $current = 0;
+        $carry = $initialValue;
 
-            while ($this->realiseElementAfter($current)) {
-                $item = array_slice($this->array, ++$current, 1);
-                yield key($item) => current($item);
-            }
+        foreach ($this->getIterator() as $key => $value) {
+            $carry = $closure($carry, $value, $key);
         }
+
+        return $carry;
+    }
+
+    public function foldr(callable $closure, $initialValue)
+    {
+        $this->realise();
+        return parent::foldr($closure, $initialValue);
+    }
+
+    // Mappable
+
+    public function map(callable $closure): Mappable
+    {
+        $this->realise();
+        return parent::map($closure);
+    }
+
+    // Lazy
+
+    public function getGenerator(): \Generator
+    {
+        return $this->lazyTail;
+    }
+
+    public function lMap(callable $closure): LazyInterface
+    {
+        $generator = (function () use ($closure) {
+            foreach ($this->getIterator() as $key => $item) {
+                yield $key => $closure($item, $key);
+            }
+        })();
+
+        return new Lazy($generator);
     }
 
     /**
