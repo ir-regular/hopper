@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Tests\Hopper\Collection;
+namespace IrRegular\Tests\Hopper\Ds\HashMap;
 
-use function IrRegular\Hopper\Collection\hash_map;
+use function IrRegular\Hopper\hash_map;
 use PHPUnit\Framework\TestCase;
 
-class HashMapTest extends TestCase
+class EagerTest extends TestCase
 {
     public function testCanCreateHashMapFromIterator()
     {
@@ -20,7 +20,7 @@ class HashMapTest extends TestCase
         ]);
         $hashMap = hash_map($iterator);
 
-        $this->assertEquals(6, $hashMap->getCount());
+        $this->assertEquals(6, $hashMap->count());
         $this->assertTrue($hashMap->isKey('Mary'));
         $this->assertEquals(1, $hashMap->get('Mary'));
     }
@@ -50,8 +50,6 @@ class HashMapTest extends TestCase
         $this->assertTrue($keys === $hashMap->getKeys());
         $this->assertEquals($values, $hashMap->getValues());
         $this->assertTrue([['1', 'one'], ['2', 'two']] === $hashMap->toVector()->getValues());
-        $this->assertTrue(['1', 'one'] === $hashMap->first());
-        $this->assertTrue(['2', 'two'] === $hashMap->last());
     }
 
     public function testHashMapWithIntegerKeys()
@@ -64,7 +62,5 @@ class HashMapTest extends TestCase
         $this->assertTrue([1, 2] === $hashMap->getKeys());
         $this->assertEquals(['one', 'two'], $hashMap->getValues());
         $this->assertTrue([[1, 'one'], [2, 'two']] === $hashMap->toVector()->getValues());
-        $this->assertTrue([1, 'one'] === $hashMap->first());
-        $this->assertTrue([2, 'two'] === $hashMap->last());
     }
 }

@@ -3,7 +3,12 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
-use IrRegular\Hopper\Collection;
+use IrRegular\Hopper\Ds\HashMap;
+use IrRegular\Hopper\Ds\Set;
+use IrRegular\Hopper\Ds\Vector;
+use function IrRegular\Hopper\hash_map;
+use function IrRegular\Hopper\set;
+use function IrRegular\Hopper\vector;
 
 trait CollectionSetUpTrait
 {
@@ -19,13 +24,13 @@ trait CollectionSetUpTrait
     /** @var array */
     private static $nestedArray;
 
-    /** @var Collection\Vector */
+    /** @var Vector */
     private static $vector;
 
-    /** @var Collection\Set */
+    /** @var Set */
     private static $set;
 
-    /** @var Collection\HashMap */
+    /** @var HashMap */
     private static $hashMap;
 
     public static function setUpBeforeClass()
@@ -35,12 +40,12 @@ trait CollectionSetUpTrait
         $keys = array_map('self::encodeKey', array_keys(self::$array));
         self::$stringIndexedArray = array_combine($keys, self::$array);
 
-        self::$vector = Collection\vector(self::$array);
+        self::$vector = vector(self::$array);
 
         // note that $array contains duplicates of the first and last element
-        self::$set = Collection\set(self::$array);
+        self::$set = set(self::$array);
 
-        self::$hashMap = Collection\hash_map(self::$stringIndexedArray);
+        self::$hashMap = hash_map(self::$stringIndexedArray);
 
         self::$nestedArray = [
             ['name' => 'John', 'address' => ['city' => 'New York']],

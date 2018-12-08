@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Tests\Hopper\Collection;
+namespace IrRegular\Tests\Hopper\Ds\HashMap;
 
-use function IrRegular\Hopper\Collection\hash_map;
-use IrRegular\Hopper\Collection\Lazy;
+use function IrRegular\Hopper\hash_map;
 use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
+use IrRegular\Hopper\Ds\HashMap\Lazy as LazyHashMap;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
 
-class LazyHashMapTest extends TestCase
+class LazyTest extends TestCase
 {
     use CollectionSetUpTrait;
 
@@ -25,7 +25,7 @@ class LazyHashMapTest extends TestCase
     {
         $map = hash_map($this->generator());
 
-        $this->assertInstanceOf(Lazy::class, $map);
+        $this->assertInstanceOf(LazyHashMap::class, $map);
     }
 
     public function testLazyHashMapPreservesItems()
@@ -40,7 +40,7 @@ class LazyHashMapTest extends TestCase
     {
         $generator = $this->generator(self::$stringIndexedArray);
         $map = hash_map($generator);
-        $this->assertEquals(7, $map->getCount());
+        $this->assertEquals(7, $map->count());
         $this->assertFalse($generator->valid());
     }
 
@@ -77,59 +77,32 @@ class LazyHashMapTest extends TestCase
         $hashMap = hash_map($this->generator(self::$stringIndexedArray));
 
         // we can advance generator to the last value...
-        $this->assertEquals(['key 6', 4], $hashMap->last());
+        $this->assertEquals(4, $hashMap->get('key 6'));
         // ...and still be able to access the previous value
-        $this->assertEquals(['key 0', 1], $hashMap->first());
+        $this->assertEquals(1, $hashMap->get('key 0'));
     }
 
-    public function testFirstIsLazy()
-    {
-        $generator = $this->generator(self::$stringIndexedArray);
-        $hashMap = hash_map($generator);
-
-        $this->assertEquals(['key 0', 1], $hashMap->first());
-
-        $this->assertTrue($generator->valid()); // and other elements still haven't been fetched
-        $this->assertEquals('key 1', $generator->key());
-    }
-
-    public function testMapIsLazy()
+    public function testLMapIsLazy()
     {
         $g = $this->generator(['one' => 1, 'two' => 2, 'three' => 3]);
         $hashMap = hash_map($g);
-        $result = $hashMap->map([$this, 'increment']);
+        $result = $hashMap->lMap([$this, 'increment']);
 
-        $this->assertEquals(['one', 2], first($result));
-        $this->assertEquals(['two', 3], second($result)); // @TODO this fails, interesting
-
-        // $result never instantiates more elements of input generator
-        // than necessary to generate results
-        // @TODO (actually now it does and I don't know why)
+        $this->assertEquals(2, $result->get('one'));
+        $this->assertEquals(3, $result->get('two'));
 
         $this->assertTrue($g->valid());
     }
 
-    public function testMapWorksOnRealisedLazyHashMap()
+    public function testLMapWorksOnRealisedLazyHashMap()
     {
         $hashMap = hash_map($this->generator(self::$stringIndexedArray));
 
-        $hashMap->getCount(); // this'll realise the whole thing
+        $hashMap->count(); // this'll realise the whole thing
 
-        $result = $hashMap->map([$this, 'increment']);
+        $result = $hashMap->lMap([$this, 'increment']);
 
-        $this->assertEquals(['key 0', 2], first($result));
-        $this->assertEquals(['key 1', 3], second($result)); // @TODO also fails
-    }
-
-    public function testRestReturnsLazyHashMap()
-    {
-        // ...and also that hashmap has its own, independent generator
-
-        $hashMap = hash_map($this->generator(['one' => 1, 'two' => 2]));
-        $rest = $hashMap->rest();
-
-        $this->assertInstanceOf(Lazy::class, $rest);
-        $this->assertEquals([2], values($rest));
-        $this->assertEquals([1, 2], $hashMap->getValues());
+        $this->assertEquals(2, $result->get('key 0'));
+        $this->assertEquals(3, $result->get('key 1'));
     }
 }
