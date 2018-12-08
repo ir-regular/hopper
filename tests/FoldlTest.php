@@ -39,7 +39,9 @@ class FoldlTest extends TestCase
     public function testSetIsFoldable()
     {
         $result = foldl(
-            partial('IrRegular\Hopper\apply', 'array_sum'),
+            function ($carry, $value) {
+                return $carry + $value;
+            },
             0,
             self::$set
         );

@@ -16,8 +16,9 @@ class Foldl1Test extends TestCase
         $this->assertEquals(
             16,
             foldl1(
-            // `array_sum` expects an array input, so we need to "pack" the arguments with `apply`
-                partial('IrRegular\Hopper\apply', 'array_sum'),
+                function ($carry, $value) {
+                    return $carry + $value;
+                },
                 self::$array
             )
         );
@@ -28,8 +29,9 @@ class Foldl1Test extends TestCase
         $this->assertEquals(
             16,
             foldl1(
-            // `array_sum` expects an array input, so we need to "pack" the arguments with `apply`
-                partial('IrRegular\Hopper\apply', 'array_sum'),
+                function ($carry, $value) {
+                    return $carry + $value;
+                },
                 self::$vector
             )
         );
