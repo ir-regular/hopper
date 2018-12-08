@@ -18,8 +18,10 @@ function rest(iterable $collection): iterable
     } elseif ($collection instanceof \Iterator) {
         $collection->next();
         return $collection;
-    } else {
-        assert(is_array($collection)); // just in case of future weirdness
-        return array_slice($collection, 1); // it'll re-index the keys, if numeric
+    } elseif ($collection instanceof \Traversable) {
+        $collection = iterator_to_array($collection);
     }
+
+    assert(is_array($collection)); // just in case of future weirdness
+    return array_slice($collection, 1); // it'll re-index the keys, if numeric
 }

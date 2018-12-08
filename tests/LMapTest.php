@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\first;
-use function IrRegular\Hopper\get;
 use function IrRegular\Hopper\keys;
-use function IrRegular\Hopper\map;
+use function IrRegular\Hopper\lmap;
 use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
 use PHPUnit\Framework\TestCase;
 
-class MappableTest extends TestCase
+class LMapTest extends TestCase
 {
     use CollectionSetUpTrait;
 
@@ -24,13 +23,13 @@ class MappableTest extends TestCase
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            values(map([$this, 'increment'], self::$array))
+            values(lmap([$this, 'increment'], self::$array))
         );
     }
 
     public function testMappingOverStringIndexedArrayPreservesKeys()
     {
-        $result = map('\IrRegular\Hopper\identity', self::$stringIndexedArray);
+        $result = lmap('\IrRegular\Hopper\identity', self::$stringIndexedArray);
 
         $this->assertEquals(
             array_keys(self::$stringIndexedArray),
@@ -42,7 +41,7 @@ class MappableTest extends TestCase
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            values(map([$this, 'increment'], self::$vector))
+            values(lmap([$this, 'increment'], self::$vector))
         );
     }
 
@@ -58,25 +57,23 @@ class MappableTest extends TestCase
                 'key 5' => 2,
                 'key 6' => 5
             ],
-            iterator_to_array(map([$this, 'increment'], self::$hashMap))
+            iterator_to_array(lmap([$this, 'increment'], self::$hashMap))
         );
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     */
-    public function testSetIsNotMappable()
+    public function testSetIsMappable()
     {
-        // note that this only throws after the generator has been first accessed
-        // thus the need for `values`
-        values(map([$this, 'increment'], self::$set));
+        // currently, falls back to iterator
+
+        $result = values(lmap([$this, 'increment'], self::$set));
+        $this->assertEquals([2, 3, 5, 4], $result);
     }
 
     public function testMapOnGeneratorIsLazy()
     {
         $generator = $this->generator(self::$array);
 
-        $result = map([$this, 'increment'], $generator);
+        $result = lmap([$this, 'increment'], $generator);
         // consume and increment the first element in generator
         $firstIncremented = first($result);
 
@@ -91,4 +88,5 @@ class MappableTest extends TestCase
         $this->assertEquals(3, second($result));
         // ...now the current element available is 2; only consume as many elements as neceesary!
         $this->assertEquals(2, $generator->current());
-    }}
+    }
+}

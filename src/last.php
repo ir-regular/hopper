@@ -23,12 +23,15 @@ function last(iterable $collection)
         do {
             $last = $collection->current();
         } while ($collection->valid());
-        $collection->rewind();
+        // @TODO: this will catch a generator, generators are not rewindable
+        //$collection->rewind();
         return $last;
-    } else {
-        assert(is_array($collection)); // just in case of future weirdness
-        $key = array_keys($collection)[count($collection) - 1];
-        // $key = array_key_last($collection); // PHP 7.3 ;_;
-        return $collection[$key];
+    } elseif ($collection instanceof \Traversable) {
+        $collection = iterator_to_array($collection);
     }
+
+    assert(is_array($collection)); // just in case of future weirdness
+    $key = array_keys($collection)[count($collection) - 1];
+    // $key = array_key_last($collection); // PHP 7.3 ;_;
+    return $collection[$key];
 }

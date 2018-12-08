@@ -19,10 +19,12 @@ function first(iterable $collection)
         return $collection->first();
     } elseif ($collection instanceof \Iterator) {
         return $collection->current();
-    } else {
-        assert(is_array($collection)); // just in case of future weirdness
-        $key = array_keys($collection)[0];
-        // $key = array_key_first($collection); // PHP7.3 ;_;
-        return $collection[$key];
+    } elseif ($collection instanceof \Traversable) {
+        $collection = iterator_to_array($collection);
     }
+
+    assert(is_array($collection)); // just in case of future weirdness
+    $key = array_keys($collection)[0];
+    // $key = array_key_first($collection); // PHP7.3 ;_;
+    return $collection[$key];
 }
