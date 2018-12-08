@@ -8,7 +8,7 @@ namespace IrRegular\Hopper\Ds;
  * but that's currently underdeveloped because all the hopper functions prefer interacting
  * with appropriate interface methods from `IrRegular\Hopper` interfaces.
  */
-interface Sequence extends \IteratorAggregate
+interface Sequence extends Collection, \IteratorAggregate
 {
     public function first();
 

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds;
 
-interface Indexed extends \ArrayAccess
+interface Indexed extends \ArrayAccess, Collection
 {
     public function isKey($key): bool;
 

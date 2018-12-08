@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds;
 
-interface Mappable
+interface Mappable extends Collection
 {
     public function map(callable $closure): Mappable;
 }
