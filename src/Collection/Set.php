@@ -119,24 +119,3 @@ class Set implements Collection, Foldable, Mappable
         return new Vector($this->array);
     }
 }
-
-function set(iterable $collection)
-{
-    $elements    = [];
-    $uniqueIndex = [];
-
-    foreach ($collection as $element) {
-        $key = is_valid_key($element)
-            ? $element
-            : convert_to_key($element);
-
-        $elementAdded = !array_key_exists($key, $uniqueIndex);
-
-        if ($elementAdded) {
-            $uniqueIndex[$key] = true;
-            $elements[] = $element;
-        }
-    }
-
-    return new Set($elements, $uniqueIndex);
-}
