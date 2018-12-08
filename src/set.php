@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
-use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
-use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
+use function IrRegular\Hopper\Language\convert_to_key;
+use function IrRegular\Hopper\Language\is_valid_key;
 use IrRegular\Hopper\Ds\Set;
 use IrRegular\Hopper\Ds\Set\HashMapBased;
 

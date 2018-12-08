@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection\HashMap;
+namespace IrRegular\Hopper\Ds\HashMap;
 
-use IrRegular\Hopper\Collection\HashMap;
-use IrRegular\Hopper\Lazy as LazyInterface;
-use IrRegular\Hopper\Sequence;
+use IrRegular\Hopper\Ds\Lazy as LazyInterface;
+use IrRegular\Hopper\Ds\Sequence;
+use function IrRegular\Hopper\Language\convert_to_key;
+use function IrRegular\Hopper\Language\is_valid_key;
 
-class Lazy extends HashMap implements LazyInterface
+class Lazy extends Eager implements LazyInterface
 {
     /**
      * @var \Generator
@@ -46,7 +47,7 @@ class Lazy extends HashMap implements LazyInterface
         return parent::foldr($closure, $initialValue);
     }
 
-    public function map(callable $closure): Lazy
+    public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
             foreach ($this->getIterator() as $key => $item) {

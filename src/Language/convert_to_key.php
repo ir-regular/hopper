@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection\HashMap;
+namespace IrRegular\Hopper\Language;
 
 /**
  * @param mixed $v

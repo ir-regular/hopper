@@ -1,22 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection;
+namespace IrRegular\Hopper\Ds\HashMap;
 
-use IrRegular\Hopper\Collection;
-use IrRegular\Hopper\Collection\HashMap\Lazy;
-use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
-use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
+use function IrRegular\Hopper\Language\convert_to_key;
+use function IrRegular\Hopper\Language\is_valid_key;
+use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Vector;
-use IrRegular\Hopper\Ds\Vector\Eager;
-use IrRegular\Hopper\Foldable;
-use IrRegular\Hopper\Indexed;
-use IrRegular\Hopper\Lazy as LazyInterface;
-use IrRegular\Hopper\Sequence;
-use IrRegular\Hopper\Mappable;
-use function IrRegular\Hopper\Collection\size;
+use IrRegular\Hopper\Ds\Vector\Eager as EagerVector;
+use IrRegular\Hopper\Ds\Lazy as LazyInterface;
+use IrRegular\Hopper\Ds\HashMap as HashMapInterface;
 
-class HashMap implements Collection, Indexed, Foldable, Mappable
+class Eager implements HashMapInterface
 {
     /**
      * @var array
@@ -56,7 +51,7 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
         );
     }
 
-    public function map(callable $closure): LazyInterface
+    public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
             foreach ($this->getValueKeyPairList() as $pair) {
@@ -106,7 +101,7 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
     {
         // Amazingly, array_slice _does_ work on arrays with string keys. IKR?!
 
-        $rest = new HashMap(
+        $rest = new Eager(
             array_slice($this->array, 1),
             array_slice($this->index, 1)
         );
@@ -156,6 +151,6 @@ class HashMap implements Collection, Indexed, Foldable, Mappable
 
     public function toVector(): Vector
     {
-        return new Eager(array_map(null, $this->index, $this->array));
+        return new EagerVector(array_map(null, $this->index, $this->array));
     }
 }

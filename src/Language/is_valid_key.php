@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection\HashMap;
+namespace IrRegular\Hopper\Language;
 
 /**
  * A value has to be a non-numeric string for a PHP to treat it as a hash map key (instead of casting to int.)
