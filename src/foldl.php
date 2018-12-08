@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
+use IrRegular\Hopper\Ds\Foldable;
+
 /**
  * Left-fold/reduce function, eager.
  *

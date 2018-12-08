@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
+use IrRegular\Hopper\Ds\Indexed;
+
 /**
  * Returns an element of $collection indexed by $key, or $default if not found.
  *

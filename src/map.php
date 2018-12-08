@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
+use IrRegular\Hopper\Ds\Mappable;
+
 /**
  * Map function, eager.
  *

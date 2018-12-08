@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
+use IrRegular\Hopper\Ds\Collection;
+
 /**
  * Return (eagerly) values of a collection, resetting the keys to a contiguous numeric range.
  *

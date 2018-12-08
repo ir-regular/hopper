@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper;
+namespace IrRegular\Hopper\Ds;
 
 /**
  * Extends \IteratorAggregate because I want the collections to fit the `iterable` slot,

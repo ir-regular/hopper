@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
+use IrRegular\Hopper\Ds\Indexed;
+
 /**
  * Predicate: does $collection contain a particular $key?
  *

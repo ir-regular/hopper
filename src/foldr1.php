@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
+use IrRegular\Hopper\Ds\Foldable;
+
 /**
  * Right-fold function, uses the last element (or key-value pair) of $collection as initial value.
  *
