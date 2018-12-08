@@ -1,19 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace IrRegular\Hopper\Collection;
+namespace IrRegular\Hopper\Ds\Set;
 
-use IrRegular\Hopper\Collection;
 use function IrRegular\Hopper\Collection\HashMap\convert_to_key;
 use function IrRegular\Hopper\Collection\HashMap\is_valid_key;
+use IrRegular\Hopper\Ds\Mappable;
+use IrRegular\Hopper\Ds\Sequence;
+use IrRegular\Hopper\Ds\Set as SetInterface;
 use IrRegular\Hopper\Ds\Vector;
 use IrRegular\Hopper\Ds\Vector\Eager;
-use IrRegular\Hopper\Foldable;
-use IrRegular\Hopper\Lazy;
-use IrRegular\Hopper\Sequence;
-use IrRegular\Hopper\Mappable;
 
-class Set implements Collection, Foldable, Mappable
+class HashMapBased implements SetInterface
 {
     /**
      * @var array
@@ -60,7 +58,7 @@ class Set implements Collection, Foldable, Mappable
         throw new \BadMethodCallException('Set does not have a defined access order: cannot fold');
     }
 
-    public function map(callable $closure): Lazy
+    public function map(callable $closure): Mappable
     {
         throw new \BadMethodCallException('Set does not have a defined access order: cannot map');
     }

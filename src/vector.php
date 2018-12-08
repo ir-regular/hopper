@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Hopper;
 
 use IrRegular\Hopper\Collection\HashMap;
-use IrRegular\Hopper\Collection\Set;
+use IrRegular\Hopper\Ds\Set;
 use IrRegular\Hopper\Ds\Vector\Eager;
 use IrRegular\Hopper\Ds\Vector\Lazy;
 
