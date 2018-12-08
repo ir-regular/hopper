@@ -6,7 +6,6 @@ namespace IrRegular\Hopper\Ds\Set;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 use IrRegular\Hopper\Ds\Mappable;
-use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Set as SetInterface;
 use IrRegular\Hopper\Ds\Vector;
 use IrRegular\Hopper\Ds\Vector\Eager;
@@ -29,82 +28,40 @@ class HashMapBased implements SetInterface
         $this->uniqueIndex = $uniqueIndex;
     }
 
+    // Collection
+
     public function isEmpty(): bool
     {
         return empty($this->array);
     }
 
-    public function getCount(): int
+    public function count(): int
     {
         return count($this->array);
     }
 
-    public function getValues(): iterable
+    public function contains($value): bool
     {
-        return $this->array;
-    }
-
-    // Set does not have a defined access order.
-    // To perform in-order processing, you must convert it to a vector.
-    // @TODO: conversion methods
-
-    public function foldl(callable $closure, $initialValue)
-    {
-        throw new \BadMethodCallException('Set does not have a defined access order: cannot fold');
-    }
-
-    public function foldr(callable $closure, $initialValue)
-    {
-        throw new \BadMethodCallException('Set does not have a defined access order: cannot fold');
-    }
-
-    public function map(callable $closure): Mappable
-    {
-        throw new \BadMethodCallException('Set does not have a defined access order: cannot map');
-    }
-
-    public function first()
-    {
-        throw new \BadMethodCallException('Set does not have a defined access order: cannot retrieve first');
-    }
-
-    public function last()
-    {
-        throw new \BadMethodCallException('Set does not have a defined access order: cannot retrieve last');
-    }
-
-    public function rest(): Sequence
-    {
-        throw new \BadMethodCallException('Set does not have a defined access order: cannot retrieve rest');
-    }
-
-    public function get($key, $default = null)
-    {
-        return $this->isKey($key) ? $key : $default;
-    }
-
-    public function isKey($key): bool
-    {
-        if (is_object($key) || is_scalar($key)) {
+        if (is_object($value) || is_scalar($value)) {
             // objects or scalars are easy to convert to a string
 
-            if (!is_valid_key($key)) {
-                $key = convert_to_key($key);
+            if (!is_valid_key($value)) {
+                $value = convert_to_key($value);
             }
 
-            assert(is_string($key) || is_int($key));
+            assert(is_string($value) || is_int($value));
 
-            return array_key_exists($key, $this->uniqueIndex);
+            return array_key_exists($value, $this->uniqueIndex);
 
         } else {
             // we don't really want to convert anything more complicated into a string if we don't have to
             // so just search for the value
 
-            return (array_search($key, $this->array, true) !== false);
+            return (array_search($value, $this->array, true) !== false);
         }
     }
 
-    public function getKeys(): iterable
+    public function getValues(): iterable
     {
         return $this->array;
     }
@@ -113,6 +70,30 @@ class HashMapBased implements SetInterface
     {
         return new \ArrayIterator($this->array);
     }
+
+    // Foldable
+
+    public function foldl(callable $closure, $initialValue)
+    {
+        return array_reduce($this->array, $closure, $initialValue);
+    }
+
+    public function foldr(callable $closure, $initialValue)
+    {
+        return array_reduce(array_reverse($this->array), $closure, $initialValue);
+    }
+
+    // Mappable
+
+    public function map(callable $closure): Mappable
+    {
+        $newValues = array_map($closure, $this->array);
+        $newIndex = array_map('\IrRegular\Hopper\Language\convert_to_key', $newValues);
+
+        return new self($newValues, $newIndex);
+    }
+
+    // Set
 
     public function toVector(): Vector
     {

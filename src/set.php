@@ -21,8 +21,8 @@ function set(iterable $collection): Set
         $elementAdded = !array_key_exists($key, $uniqueIndex);
 
         if ($elementAdded) {
-            $uniqueIndex[$key] = true;
             $elements[] = $element;
+            $uniqueIndex[$key] = count($elements) - 1;
         }
     }
 
