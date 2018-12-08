@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper;
 
-interface Indexable
+interface Indexed
 {
     public function isKey($key): bool;
 

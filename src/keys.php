@@ -14,7 +14,7 @@ namespace IrRegular\Hopper;
  */
 function keys(iterable $collection): iterable
 {
-    if ($collection instanceof Indexable) {
+    if ($collection instanceof Indexed) {
         return $collection->getKeys();
     } elseif ($collection instanceof \Traversable) {
         return array_keys(iterator_to_array($collection, true));

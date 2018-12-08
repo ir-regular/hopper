@@ -12,7 +12,7 @@ namespace IrRegular\Hopper;
  */
 function is_key(iterable $collection, $key): bool
 {
-    if ($collection instanceof Indexable) {
+    if ($collection instanceof Indexed) {
         return $collection->isKey($key);
 
     } elseif (is_array($collection)) {

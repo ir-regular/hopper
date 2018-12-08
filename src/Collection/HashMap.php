@@ -5,13 +5,13 @@ namespace IrRegular\Hopper\Collection;
 
 use IrRegular\Hopper\Collection;
 use IrRegular\Hopper\Foldable;
-use IrRegular\Hopper\Indexable;
+use IrRegular\Hopper\Indexed;
 use IrRegular\Hopper\Lazy;
 use IrRegular\Hopper\Sequence;
 use IrRegular\Hopper\Mappable;
 use function IrRegular\Hopper\size;
 
-class HashMap implements Collection, Sequence, Indexable, Mappable, Foldable
+class HashMap implements Collection, Sequence, Indexed, Mappable, Foldable
 {
     /**
      * @var array

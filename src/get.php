@@ -13,7 +13,7 @@ namespace IrRegular\Hopper;
  */
 function get(iterable $collection, $key, $default = null)
 {
-    if ($collection instanceof Indexable) {
+    if ($collection instanceof Indexed) {
         return $collection->get($key, $default);
 
     } elseif (is_array($collection)) {
