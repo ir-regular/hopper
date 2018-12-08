@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Hopper\Ds\Vector;
 
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
+use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Sequence;
 
 /**
@@ -29,43 +30,24 @@ class Lazy extends Eager implements LazyInterface
         $this->lazyTail = $lazyTail;
     }
 
-    public function getGenerator(): \Generator
-    {
-        return $this->lazyTail;
-    }
-
-    public function foldl(callable $closure, $initialValue)
-    {
-        $this->realise();
-        return parent::foldl($closure, $initialValue);
-    }
-
-    public function foldr(callable $closure, $initialValue)
-    {
-        $this->realise();
-        return parent::foldr($closure, $initialValue);
-    }
-
-    public function lMap(callable $closure): LazyInterface
-    {
-        $generator = (function () use ($closure) {
-            foreach ($this->getIterator() as $value) {
-                yield $closure($value);
-            }
-        })();
-
-        return new Lazy($generator);
-    }
+    // Collection
 
     public function isEmpty(): bool
     {
         return empty($this->array) && !$this->lazyTail->valid();
     }
 
-    public function getCount(): int
+    public function contains($value): bool
+    {
+        // @TODO change realise to a condition based on index OR value
+        $this->realise();
+        return parent::contains($value);
+    }
+
+    public function count(): int
     {
         $this->realise();
-        return parent::getCount();
+        return parent::count();
     }
 
     public function getValues(): iterable
@@ -73,6 +55,21 @@ class Lazy extends Eager implements LazyInterface
         $this->realise();
         return parent::getValues();
     }
+
+    public function getIterator()
+    {
+        if ($this->realiseFirstElement()) {
+            yield $this->array[0];
+
+            $current = 0;
+
+            while ($this->realiseElementAfter($current)) {
+                yield $this->array[++$current];
+            }
+        }
+    }
+
+    // Sequence
 
     public function first()
     {
@@ -91,8 +88,10 @@ class Lazy extends Eager implements LazyInterface
         $generator = $this->getIterator();
         $generator->next(); // skip the first item
 
-        return new Lazy($generator);
+        return new self($generator);
     }
+
+    // Indexed
 
     public function get($key, $default = null)
     {
@@ -118,17 +117,44 @@ class Lazy extends Eager implements LazyInterface
         return parent::getKeys();
     }
 
-    public function getIterator()
+    // Foldable
+
+    public function foldl(callable $closure, $initialValue)
     {
-        if ($this->realiseFirstElement()) {
-            yield $this->array[0];
+        $this->realise();
+        return parent::foldl($closure, $initialValue);
+    }
 
-            $current = 0;
+    public function foldr(callable $closure, $initialValue)
+    {
+        $this->realise();
+        return parent::foldr($closure, $initialValue);
+    }
 
-            while ($this->realiseElementAfter($current)) {
-                yield $this->array[++$current];
+    // Mappable
+
+    public function map(callable $closure): Mappable
+    {
+        $this->realise();
+        return parent::map($closure);
+    }
+
+    // Lazy
+
+    public function getGenerator(): \Generator
+    {
+        return $this->lazyTail;
+    }
+
+    public function lMap(callable $closure): LazyInterface
+    {
+        $generator = (function () use ($closure) {
+            foreach ($this->getIterator() as $value) {
+                yield $closure($value);
             }
-        }
+        })();
+
+        return new Lazy($generator);
     }
 
     /**

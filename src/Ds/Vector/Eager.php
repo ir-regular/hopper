@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds\Vector;
 
-use IrRegular\Hopper\Ds\Vector as VectorInterface;
-use IrRegular\Hopper\Ds\Lazy as LazyInterface;
+use IrRegular\Hopper\Ds\Mappable;
+use IrRegular\Hopper\Ds\Sequence;
+use IrRegular\Hopper\Ds\Vector;
 
-class Eager implements VectorInterface
+class Eager implements Vector
 {
     /**
      * @var array
@@ -18,33 +19,19 @@ class Eager implements VectorInterface
         $this->array = $collection;
     }
 
-    public function foldl(callable $closure, $initialValue)
-    {
-        return array_reduce($this->array, $closure, $initialValue);
-    }
-
-    public function foldr(callable $closure, $initialValue)
-    {
-        return array_reduce(array_reverse($this->array), $closure, $initialValue);
-    }
-
-    public function lMap(callable $closure): LazyInterface
-    {
-        $generator = (function () use ($closure) {
-            foreach ($this->array as $value) {
-                yield $closure($value);
-            }
-        })();
-
-        return new Lazy($generator);
-    }
+    // Collection
 
     public function isEmpty(): bool
     {
         return empty($this->array);
     }
 
-    public function getCount(): int
+    public function contains($value): bool
+    {
+        return in_array($value, $this->array);
+    }
+
+    public function count(): int
     {
         return count($this->array);
     }
@@ -53,6 +40,13 @@ class Eager implements VectorInterface
     {
         return $this->array;
     }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->array);
+    }
+
+    // Sequence
 
     public function first()
     {
@@ -70,9 +64,11 @@ class Eager implements VectorInterface
 
     public function rest(): Sequence
     {
-        $rest = new Eager(array_slice($this->array, 1));
+        $rest = new self(array_slice($this->array, 1));
         return $rest;
     }
+
+    // Indexed
 
     public function get($key, $default = null)
     {
@@ -91,8 +87,57 @@ class Eager implements VectorInterface
         return array_keys($this->array);
     }
 
-    public function getIterator()
+    public function offsetExists($offset)
     {
-        return new \ArrayIterator($this->array);
+        return $this->isKey($offset);
     }
+
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        throw new \BadMethodCallException('Hopper collections are not mutable');
+    }
+
+    public function offsetUnset($offset)
+    {
+        throw new \BadMethodCallException('Hopper collections are not mutable');
+    }
+
+    // Foldable
+
+    public function foldl(callable $closure, $initialValue)
+    {
+        return array_reduce($this->array, $closure, $initialValue);
+    }
+
+    public function foldr(callable $closure, $initialValue)
+    {
+        return array_reduce(array_reverse($this->array), $closure, $initialValue);
+    }
+
+    // Mappable
+
+    public function map(callable $closure): Mappable
+    {
+        $newValues = array_map($closure, $this->array);
+        return new self($newValues);
+    }
+
+//    @TODO: Lazy map leftover - need to rethink Lazy interface
+//    lmap should currently work without it, just by peeking at keys.
+//
+//    public function lMap(callable $closure): LazyInterface
+//    {
+//        $generator = (function () use ($closure) {
+//            foreach ($this->array as $value) {
+//                yield $closure($value);
+//            }
+//        })();
+//
+//        return new Lazy($generator);
+//    }
 }
