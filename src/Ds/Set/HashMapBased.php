@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds\Set;
 
+use IrRegular\Hopper\Ds\Lazy;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 use IrRegular\Hopper\Ds\Mappable;
@@ -91,6 +92,17 @@ class HashMapBased implements SetInterface
         $newIndex = array_map('\IrRegular\Hopper\Language\convert_to_key', $newValues);
 
         return new self($newValues, $newIndex);
+    }
+
+    public function lMap(callable $closure): Lazy
+    {
+        $generator = (function () use ($closure) {
+            foreach ($this->getIterator() as $element) {
+                yield $closure($element);
+            }
+        })();
+
+        return new Vector\Lazy($generator);
     }
 
     // Set

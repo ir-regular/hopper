@@ -139,13 +139,6 @@ class Lazy extends Eager implements LazyInterface
         return parent::map($closure);
     }
 
-    // Lazy
-
-    public function getGenerator(): \Generator
-    {
-        return $this->lazyTail;
-    }
-
     public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
@@ -155,6 +148,13 @@ class Lazy extends Eager implements LazyInterface
         })();
 
         return new Lazy($generator);
+    }
+
+    // Lazy
+
+    public function getGenerator(): \Generator
+    {
+        return $this->lazyTail;
     }
 
     /**

@@ -23,18 +23,17 @@ class RestTest extends TestCase
             rest(self::$vector)
         );
 
-        // @TODO: this is not really what should happen
-        // but then neither HashMap nor Set are Sequences
-        // Sort out exceptions.
+        // Neither HashMap nor Set are Sequences;
+        // the code falls back to their IteratorAggregate impl
 
         $this->assertEquals(
             [
-                'key 1' => 2,
-                'key 2' => 1,
-                'key 3' => 4,
-                'key 4' => 3,
-                'key 5' => 1,
-                'key 6' => 4,
+                [2, 'key 1'],
+                [1, 'key 2'],
+                [4, 'key 3'],
+                [3, 'key 4'],
+                [1, 'key 5'],
+                [4, 'key 6'],
             ],
             rest(self::$hashMap)
         );

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds\Vector;
 
+use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Vector;
@@ -127,17 +128,14 @@ class Eager implements Vector
         return new self($newValues);
     }
 
-//    @TODO: Lazy map leftover - need to rethink Lazy interface
-//    lmap should currently work without it, just by peeking at keys.
-//
-//    public function lMap(callable $closure): LazyInterface
-//    {
-//        $generator = (function () use ($closure) {
-//            foreach ($this->array as $value) {
-//                yield $closure($value);
-//            }
-//        })();
-//
-//        return new Lazy($generator);
-//    }
+    public function lMap(callable $closure): LazyInterface
+    {
+        $generator = (function () use ($closure) {
+            foreach ($this->array as $value) {
+                yield $closure($value);
+            }
+        })();
+
+        return new Lazy($generator);
+    }
 }

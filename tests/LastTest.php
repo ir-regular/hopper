@@ -16,7 +16,7 @@ class LastTest extends TestCase
         $this->assertEquals(4, last(self::$vector));
 
         // @TODO: Not sequences, takes the last element of fallback iterator
-        $this->assertEquals(4, last(self::$hashMap));
+        $this->assertEquals([4, 'key 6'], last(self::$hashMap));
         // it's 3, not 4, because the last 4 is a duplicate and thus not added
         $this->assertEquals(3, last(self::$set));
     }

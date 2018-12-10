@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper;
 
+use IrRegular\Hopper\Ds\HashMap\Lazy as LazyHashMap;
+use IrRegular\Hopper\Ds\Vector\Lazy as LazyVector;
 use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\lmap;
@@ -39,34 +41,30 @@ class LMapTest extends TestCase
 
     public function testVectorIsMappable()
     {
-        $this->assertEquals(
-            [2, 3, 2, 5, 4, 2, 5],
-            values(lmap([$this, 'increment'], self::$vector))
-        );
+        $result = lmap([$this, 'increment'], self::$vector);
+
+        $this->assertInstanceOf(LazyVector::class, $result);
+        $this->assertEquals([2, 3, 2, 5, 4, 2, 5], values($result));
     }
 
     public function testHashMapIsMappable()
     {
-        $this->assertEquals(
-            [
-                'key 0' => 2,
-                'key 1' => 3,
-                'key 2' => 2,
-                'key 3' => 5,
-                'key 4' => 4,
-                'key 5' => 2,
-                'key 6' => 5
-            ],
-            iterator_to_array(lmap([$this, 'increment'], self::$hashMap))
-        );
+        /** @var LazyHashMap $result */
+        $result = lmap([$this, 'increment'], self::$hashMap);
+
+        $this->assertInstanceOf(LazyHashMap::class, $result);
+        $this->assertEquals(2, $result->get('key 0'));
+        $this->assertEquals(5, $result->get('key 6'));
     }
 
     public function testSetIsMappable()
     {
-        // currently, falls back to iterator
+        $result = lmap([$this, 'increment'], self::$set);
 
-        $result = values(lmap([$this, 'increment'], self::$set));
-        $this->assertEquals([2, 3, 5, 4], $result);
+        // currently, degenerates to a vector
+
+        $this->assertInstanceOf(LazyVector::class, $result);
+        $this->assertEquals([2, 3, 5, 4], values($result));
     }
 
     public function testMapOnGeneratorIsLazy()
@@ -74,6 +72,9 @@ class LMapTest extends TestCase
         $generator = $this->generator(self::$array);
 
         $result = lmap([$this, 'increment'], $generator);
+
+        $this->assertInstanceOf(LazyVector::class, $result);
+
         // consume and increment the first element in generator
         $firstIncremented = first($result);
 

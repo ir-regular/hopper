@@ -34,7 +34,11 @@ class EagerTest extends TestCase
         $this->assertTrue($hashMap->isKey('one'));
         $this->assertEquals(array_keys($array), $hashMap->getKeys());
         $this->assertEquals(array_values($array), $hashMap->getValues());
-        $this->assertEquals($array, iterator_to_array($hashMap->getIterator()));
+        $this->assertEquals(
+            // note that value comes before key
+            [['ichi', 'one'], ['ni', 'two']],
+            iterator_to_array($hashMap->getIterator())
+        );
     }
 
     public function testHashMapWithNumericStringKeys()

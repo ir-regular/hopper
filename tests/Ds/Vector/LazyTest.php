@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper\Ds\Vector;
 
 use IrRegular\Hopper\Ds\Vector\Lazy as LazyVector;
-use function IrRegular\Hopper\vector;
 use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\get;
+use function IrRegular\Hopper\lmap;
 use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
+use function IrRegular\Hopper\vector;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -114,19 +115,17 @@ class LazyTest extends TestCase
 
     public function testDeeplyNestedVectorsHaveNoSkew()
     {
-        $this->markTestSkipped('Laziness mechanics in flux: test temporarily skipped');
-
         /** @var \Generator $generator */
         $generator = (function () {
             yield from [1, 2, 3, 4];
         })();
 
         /** @var LazyVector $v1 */
-        $v1 = \IrRegular\Hopper\map('\IrRegular\Hopper\identity', $generator);
+        $v1 = lmap('\IrRegular\Hopper\identity', $generator);
         /** @var LazyVector $v2 */
-        $v2 = \IrRegular\Hopper\map('\IrRegular\Hopper\identity', $v1);
+        $v2 = lmap('\IrRegular\Hopper\identity', $v1);
         /** @var LazyVector $v3 */
-        $v3 = \IrRegular\Hopper\map('\IrRegular\Hopper\identity', $v2);
+        $v3 = lmap('\IrRegular\Hopper\identity', $v2);
 
         $this->assertEquals(1, get($v3, 0));
         $this->assertEquals(1, $generator->current());

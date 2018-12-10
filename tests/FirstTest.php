@@ -15,9 +15,8 @@ class FirstTest extends TestCase
         $this->assertEquals(1, first(self::$array));
         $this->assertEquals(1, first(self::$vector));
 
-        // @TODO: HashMap and Set are not Sequences, so currently
-        // first returns the first value from iterator
-        $this->assertEquals(1, first(self::$hashMap));
+        // Not Sequences, code falls back to IteratorAggregate
+        $this->assertEquals([1, 'key 0'], first(self::$hashMap));
         $this->assertEquals(1, first(self::$set));
     }
 }

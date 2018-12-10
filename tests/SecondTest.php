@@ -15,8 +15,8 @@ class SecondTest extends TestCase
         $this->assertEquals(2, second(self::$array));
         $this->assertEquals(2, second(self::$vector));
 
-        // @TODO: not sequences, falls back to iterator
-        $this->assertEquals(2, second(self::$hashMap));
+        // Not sequences, code falls back to IteratorAggregate
+        $this->assertEquals([2, 'key 1'], second(self::$hashMap));
         $this->assertEquals(2, second(self::$set));
     }
 }

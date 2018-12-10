@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds\HashMap;
 
+use IrRegular\Hopper\Ds\HashMap as HashMapInterface;
+use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Vector;
 use IrRegular\Hopper\Ds\Vector\Eager as EagerVector;
-use IrRegular\Hopper\Ds\HashMap as HashMapInterface;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 
@@ -52,7 +53,7 @@ class Eager implements HashMapInterface
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->array);
+        return new \ArrayIterator($this->getValueKeyPairList());
     }
 
     // Indexed
@@ -137,25 +138,24 @@ class Eager implements HashMapInterface
         return new self($collection, $this->index);
     }
 
+    public function lMap(callable $closure): LazyInterface
+    {
+        $generator = (function () use ($closure) {
+            foreach ($this->getValueKeyPairList() as $pair) {
+                // @TODO: fix this: hashmap keys can't always be treated as valid php keys
+                yield $pair[1] => $closure(...$pair);
+            }
+        })();
+
+        return new Lazy($generator);
+    }
+
     // HashMaph
 
     public function toVector(): Vector
     {
         return new EagerVector(array_map(null, $this->index, $this->array));
     }
-
-// @TODO: need to rethink lazy interface
-//
-//    public function lMap(callable $closure): LazyInterface
-//    {
-//        $generator = (function () use ($closure) {
-//            foreach ($this->getValueKeyPairList() as $pair) {
-//                yield $pair[1] => $closure(...$pair);
-//            }
-//        })();
-//
-//        return new Lazy($generator);
-//    }
 
     /**
      * Returns an (eagerly generated) array of [value, key] pairs of original array.
