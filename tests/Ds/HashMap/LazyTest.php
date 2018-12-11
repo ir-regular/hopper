@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace IrRegular\Tests\Hopper\Ds\HashMap;
 
+use IrRegular\Hopper\Ds\HashMap\Lazy;
 use function IrRegular\Hopper\hash_map;
-use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
-use function IrRegular\Hopper\second;
 use function IrRegular\Hopper\values;
 use IrRegular\Hopper\Ds\HashMap\Lazy as LazyHashMap;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
@@ -86,6 +85,8 @@ class LazyTest extends TestCase
     {
         $g = $this->generator(['one' => 1, 'two' => 2, 'three' => 3]);
         $hashMap = hash_map($g);
+
+        /** @var Lazy $result */
         $result = $hashMap->lMap([$this, 'increment']);
 
         $this->assertEquals(2, $result->get('one'));
@@ -100,9 +101,29 @@ class LazyTest extends TestCase
 
         $hashMap->count(); // this'll realise the whole thing
 
+        /** @var Lazy $result */
         $result = $hashMap->lMap([$this, 'increment']);
 
         $this->assertEquals(2, $result->get('key 0'));
         $this->assertEquals(3, $result->get('key 1'));
+    }
+
+    public function testLMapOnMapIndexedByObjects()
+    {
+        $o1 = (object) ['name' => 'Remy'];
+        $o2 = (object) ['name' => 'Emile'];
+
+        $keys = [$o1, $o2];
+        $values = ['Chef', 'Support'];
+
+        $eager = hash_map($values, $keys);
+
+        /** @var Lazy $lazy */
+        $lazy = $eager->lMap(function ($role, $rat) {
+            return "{$rat->name} is a $role";
+        });
+
+        $this->assertEquals("Remy is a Chef", $lazy->get($o1));
+        $this->assertEquals($keys, $lazy->getKeys());
     }
 }

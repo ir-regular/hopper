@@ -33,7 +33,8 @@ class EagerTest extends TestCase
     {
         $hashMap = hash_map([1, 2], ['one', 'two']);
         $vector = vector($hashMap);
-        $this->assertEquals([['one', 1], ['two', 2]], $vector->getValues());
+        // note: values first, keys second
+        $this->assertEquals([[1, 'one'], [2, 'two']], $vector->getValues());
     }
 
     public function testCanCreateVectorFromSet()

@@ -53,7 +53,7 @@ class EagerTest extends TestCase
         $this->assertTrue($hashMap->isKey('1'));
         $this->assertTrue($keys === $hashMap->getKeys());
         $this->assertEquals($values, $hashMap->getValues());
-        $this->assertTrue([['1', 'one'], ['2', 'two']] === $hashMap->toVector()->getValues());
+        $this->assertTrue([['one', '1'], ['two', '2']] === $hashMap->toVector()->getValues());
     }
 
     public function testHashMapWithIntegerKeys()
@@ -65,6 +65,26 @@ class EagerTest extends TestCase
         $this->assertFalse($hashMap->isKey('1'));
         $this->assertTrue([1, 2] === $hashMap->getKeys());
         $this->assertEquals(['one', 'two'], $hashMap->getValues());
-        $this->assertTrue([[1, 'one'], [2, 'two']] === $hashMap->toVector()->getValues());
+        $this->assertTrue([['one', 1], ['two', 2]] === $hashMap->toVector()->getValues());
+    }
+
+    public function testHashMapWithObjectKeys()
+    {
+        $o1 = (object) ['name' => 'Remy'];
+        $o2 = (object) ['name' => 'Emile'];
+        $o3 = (object) ['name' => 'Gusteau'];
+
+        $keys = [$o1, $o2];
+        $values = ['Chef', 'Support'];
+
+        $hashMap = hash_map($values, $keys);
+
+        $this->assertTrue($hashMap->isKey($o1));
+        $this->assertFalse($hashMap->isKey($o3));
+        $this->assertEquals($keys, $hashMap->getKeys());
+        $this->assertEquals($values, $hashMap->getValues());
+
+        $this->assertEquals('Chef', $hashMap->get($o1));
+        $this->assertNull($hashMap->get($o3));
     }
 }

@@ -16,14 +16,14 @@ class Eager implements HashMapInterface
     /**
      * @var array
      */
-    protected $index = [];
+    protected $index;
 
     /**
      * @var array
      */
-    protected $array = [];
+    protected $array;
 
-    public function __construct(array $collection, array $stringIndex)
+    public function __construct(array $collection, ?array $stringIndex = null)
     {
         $this->array = $collection;
         $this->index = $stringIndex;
@@ -61,8 +61,11 @@ class Eager implements HashMapInterface
     public function get($key, $default = null)
     {
         if (!is_valid_key($key)) {
-            $safeKey = convert_to_key($key);
-            $key = $this->index[$safeKey] ?? null;
+            if ($this->areAllKeysValid()) {
+                return $default;
+            }
+
+            $key = convert_to_key($key);
         }
 
         return $this->array[$key] ?? $default;
@@ -71,6 +74,10 @@ class Eager implements HashMapInterface
     public function isKey($key): bool
     {
         if (!is_valid_key($key)) {
+            if ($this->areAllKeysValid()) {
+                return false;
+            }
+
             $key = convert_to_key($key);
             return array_key_exists($key, $this->index);
         } else {
@@ -80,7 +87,9 @@ class Eager implements HashMapInterface
 
     public function getKeys(): iterable
     {
-        return array_values($this->index);
+        return $this->areAllKeysValid()
+            ? array_keys($this->array)
+            : array_values($this->index);
     }
 
     public function offsetExists($offset)
@@ -131,7 +140,8 @@ class Eager implements HashMapInterface
 
     public function map(callable $closure): Mappable
     {
-        $collection = array_map($closure, $this->array, $this->index);
+        $keys = $this->areAllKeysValid() ? $this->index : array_keys($this->array);
+        $collection = array_map($closure, $this->array, $keys);
 
         // for now - preserving keys as they were
 
@@ -141,20 +151,19 @@ class Eager implements HashMapInterface
     public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
-            foreach ($this->getValueKeyPairList() as $pair) {
-                // @TODO: fix this: hashmap keys can't always be treated as valid php keys
-                yield $pair[1] => $closure(...$pair);
+            foreach ($this->getValueKeyPairList() as [$value, $key]) {
+                yield [$closure($value, $key), $key];
             }
         })();
 
-        return new Lazy($generator);
+        return new Lazy($generator, Lazy::FORMAT_VK);
     }
 
     // HashMaph
 
     public function toVector(): Vector
     {
-        return new EagerVector(array_map(null, $this->index, $this->array));
+        return new EagerVector($this->getValueKeyPairList());
     }
 
     /**
@@ -164,6 +173,21 @@ class Eager implements HashMapInterface
      */
     protected function getValueKeyPairList(): array
     {
-        return array_map(null, $this->array, $this->index);
+        $index = $this->areAllKeysValid()
+            ? array_keys($this->array)
+            : $this->index;
+
+        return array_map(null, $this->array, $index);
+    }
+
+    /**
+     * If $this->index is null, that means all keys of $this->array are valid keys (non-numeric strings).
+     *
+     * @return bool
+     * @see \IrRegular\Hopper\Language\is_valid_key()
+     */
+    protected function areAllKeysValid(): bool
+    {
+        return is_null($this->index);
     }
 }

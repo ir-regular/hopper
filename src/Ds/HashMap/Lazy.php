@@ -11,15 +11,33 @@ use function IrRegular\Hopper\Language\is_valid_key;
 class Lazy extends Eager implements LazyInterface
 {
     /**
+     * Generator assumed to `yield $key => $value` formatted data.
+     *
+     * Use FORMAT_PHP when processing generators created by non-Hopper code.
+     */
+    const FORMAT_PHP = 'php';
+
+    /**
+     * Generator assumed to `yield [$value, $key]` formatted data.
+     */
+    const FORMAT_VK = 'vk_pair';
+
+    /**
      * @var \Generator
      */
     protected $lazyTail;
 
-    public function __construct(\Generator $lazyTail)
+    /**
+     * @var string
+     */
+    protected $generatorFormat;
+
+    public function __construct(\Generator $lazyTail, $format = self::FORMAT_PHP)
     {
         parent::__construct([], []);
 
         $this->lazyTail = $lazyTail;
+        $this->generatorFormat = $format;
     }
 
     // Collection
@@ -49,15 +67,20 @@ class Lazy extends Eager implements LazyInterface
 
     public function getIterator()
     {
-        if ($this->realiseFirstElement()) {
-            $item = array_slice($this->array, 0, 1);
-            yield key($item) => current($item);
+        if (!$this->lazyTail->valid()) {
+            yield from parent::getIterator();
+            return;
+        }
+
+        // if, however, lazyTail is not yet fully realised:
+
+        if ($safeKey = $this->realiseFirstElement()) {
+            yield [$this->array[$safeKey], $this->index[$safeKey] ?? $safeKey];
 
             $current = 0;
 
-            while ($this->realiseElementAfter($current)) {
-                $item = array_slice($this->array, ++$current, 1);
-                yield key($item) => current($item);
+            while ($safeKey = $this->realiseElementAfter($current)) {
+                yield [$this->array[$safeKey], $this->index[$safeKey] ?? $safeKey];
             }
         }
     }
@@ -101,7 +124,7 @@ class Lazy extends Eager implements LazyInterface
 
         $carry = $initialValue;
 
-        foreach ($this->getIterator() as $key => $value) {
+        foreach ($this->getIterator() as [$value, $key]) {
             $carry = $closure($carry, $value, $key);
         }
 
@@ -125,12 +148,12 @@ class Lazy extends Eager implements LazyInterface
     public function lMap(callable $closure): LazyInterface
     {
         $generator = (function () use ($closure) {
-            foreach ($this->getIterator() as $key => $item) {
-                yield $key => $closure($item, $key);
+            foreach ($this->getIterator() as [$item, $key]) {
+                yield [$closure($item, $key), $key];
             }
         })();
 
-        return new Lazy($generator);
+        return new Lazy($generator, Lazy::FORMAT_VK);
     }
 
     // Lazy
@@ -147,9 +170,7 @@ class Lazy extends Eager implements LazyInterface
      */
     protected function realise(): void
     {
-        $this->realiseUntil(function () {
-            return false;
-        });
+        $this->realiseUntil(null);
     }
 
     /**
@@ -183,77 +204,124 @@ class Lazy extends Eager implements LazyInterface
     }
 
     /**
-     * Realise and cache elements of generator until $predicate($safeKey) returns true, or until generator runs out.
+     * Realise and cache elements of generator until $isDone($safeKey) returns true, or until generator runs out.
      *
-     * @param callable $isDone
+     * @param callable|null $isDone
      * @return void
      */
-    protected function realiseUntil(callable $isDone): void
+    protected function realiseUntil(?callable $isDone): void
     {
-        if ($this->realiseFirstElement()) {
-            $current = 0;
-            // $safeKey = array_key_first($this->index); // PHP 7.3
-            $safeKey = array_keys($this->index)[0];
+        $safeKey = $this->realiseFirstElement();
+        $current = 0;
 
-            while (!$isDone($safeKey) && $this->realiseElementAfter($current)) {
-                $item = array_slice($this->index, ++$current, 1);
-                $safeKey = key($item);
-            }
+        while ($safeKey && (!$isDone || !$isDone($safeKey))) {
+            $safeKey = $this->realiseElementAfter($current++);
         }
+
+        $this->clearIndexIfAllKeysValid();
     }
 
     /**
      * Ensure the first element of the generator is realised.
      *
-     * @return bool Whether 0th element now exists (false means generator's finished.)
+     * @return string|null Safe key of the first element, or null to indicate generator is finished.
      */
-    protected function realiseFirstElement(): bool
+    protected function realiseFirstElement(): ?string
     {
+        $safeKey = null;
+
         if (count($this->array) == 0) {
             if ($this->lazyTail->valid()) {
-                $originalKey = $this->lazyTail->key();
-                $safeKey = is_valid_key($originalKey)
-                    ? $originalKey
-                    : convert_to_key($originalKey);
-
-                $this->index[$safeKey] = $originalKey;
-                $this->array[$originalKey] = $this->lazyTail->current();
+                $safeKey = $this->realiseCurrentPair();
             } else {
-                return false;
+                $this->clearIndexIfAllKeysValid();
             }
+        } elseif ($this->lazyTail->valid()) {
+            $safeKey = array_keys($this->array)[0];
         }
 
-        return true;
+        return $safeKey;
     }
 
     /**
      * Ensure the next element after $current is realised.
      *
-     * Note that this assumes all elements in range (0;$current) have been realised.
+     * Note that this assumes all elements in range (0;$current) have already been realised.
      *
      * @param int $current
-     * @return bool Whether $current+1 element now exists (false means generator's finished.)
+     * @return string|null The just-realised element key (or null to indicate generator is finished).
      */
-    protected function realiseElementAfter(int $current): bool
+    protected function realiseElementAfter(int $current): ?string
     {
         assert($current >= 0);
+
+        $safeKey = null;
 
         if (count($this->array) == $current + 1) {
             $this->lazyTail->next();
 
             if ($this->lazyTail->valid()) {
-                $originalKey = $this->lazyTail->key();
-                $safeKey = is_valid_key($originalKey)
-                    ? $originalKey
-                    : convert_to_key($originalKey);
-
-                $this->index[$safeKey] = $originalKey;
-                $this->array[$safeKey] =  $this->lazyTail->current();
+                $safeKey = $this->realiseCurrentPair();
             } else {
-                return false;
+                $this->clearIndexIfAllKeysValid();
+            }
+        } elseif ($this->lazyTail->valid()) {
+            $safeKey = $safeKey = array_keys($this->array)[$current + 1];
+        }
+
+        return $safeKey;
+    }
+
+    /**
+     * Realise next (key,value) pair and return the key in safe-key (non-numeric string) form.
+     *
+     * Uses generatorFormat to interpret generator results.
+     * Equivalent to current() in that it does not advance the generator to next element.
+     *
+     * @return string
+     */
+    protected function realiseCurrentPair(): string
+    {
+        if ($this->generatorFormat == self::FORMAT_PHP) {
+            $key = $this->lazyTail->key();
+            $value = $this->lazyTail->current();
+        } else {
+            [$value, $key] = $this->lazyTail->current();
+        }
+
+        $safeKey = is_valid_key($key) ? $key  : convert_to_key($key);
+
+        $this->index[$safeKey] = $key;
+        $this->array[$safeKey] = $value;
+
+        return $safeKey;
+    }
+
+    /**
+     * If lazyTail generator is exhausted, and all keys turned out to be safe, we can get rid of index.
+     *
+     * Performance optimisation.
+     *
+     * @return void
+     */
+    protected function clearIndexIfAllKeysValid(): void
+    {
+        if (is_null($this->index) || $this->lazyTail->valid()) {
+            return;
+        }
+
+        $allKeysValid = true;
+
+        foreach ($this->index as $safeKey => $unsafeKey) {
+            if ($safeKey !== $unsafeKey) {
+                $allKeysValid = false;
+                break;
             }
         }
 
-        return true;
+        if ($allKeysValid) {
+            // this causes $this->areAllKeysValid() to start returning true
+            $this->index = null;
+        }
     }
 }

@@ -12,7 +12,8 @@ use function IrRegular\Hopper\Language\is_valid_key;
 /**
  * If you use numerical strings as indices, PHP will convert them to ints
  * before handing it over to this function. So, if you really want to have keys like '1', '2', ...
- * you need to supply the keys in the optional $keys argument
+ * you need to supply the keys in the optional $keys argument. Also if you want to index
+ * by values which are not valid PHP keys, such as objects or arrays.
  *
  * @param iterable $collection
  * @param iterable|null $keys Keys of the correct, un-cast-by-PHP type.
@@ -39,19 +40,23 @@ function hash_map(iterable $collection, iterable $keys = null): HashMap
 
     $values = [];
     $stringIndex = [];
+    $containsUnsafeKeys = false;
 
     foreach ($collection as $value) {
         $originalKey = current($keys);
-        $safeKey = is_valid_key($originalKey)
-            ? $originalKey
-            : convert_to_key($originalKey);
+
+        if (is_valid_key($originalKey)) {
+            $safeKey = $originalKey;
+        } else {
+            $safeKey = convert_to_key($originalKey);
+            $containsUnsafeKeys = true;
+        }
 
         $stringIndex[$safeKey] = $originalKey;
-        // why not just supply $collection instead of rebuilding it as $values?
-        // because you need to be able to reindex using $keys
-        $values[$originalKey] = $value;
+        $values[$safeKey] = $value;
+
         next($keys);
     }
 
-    return new EagerHashMap($values, $stringIndex);
+    return new EagerHashMap($values, $containsUnsafeKeys ? $stringIndex : null);
 }
