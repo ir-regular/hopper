@@ -26,7 +26,9 @@ function lmap(callable $closure, iterable $collection): Lazy
         ? $collection->key()
         : key($collection); // peek at the first key
 
-    if (is_int($key) || ctype_xdigit($key)) {
+    // null $key means failure; empty collection
+
+    if (is_null($key) || is_int($key) || ctype_xdigit($key)) {
         $collectionConstructor = '\IrRegular\Hopper\vector';
     } else {
         $collectionConstructor = '\IrRegular\Hopper\hash_map';
