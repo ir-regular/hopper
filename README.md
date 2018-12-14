@@ -2,6 +2,8 @@
 
 Clojure-inspired library for processing deeply-nested data structures in PHP.
 
+Test status [![CircleCI](https://circleci.com/gh/ir-regular/hopper/tree/master.svg?style=svg)](https://circleci.com/gh/ir-regular/hopper/tree/master)
+
 ## Use Hopper if you are...
 
 ...reformatting deeply nested structures retrieved from JSON- or XML-speaking API in memory.
