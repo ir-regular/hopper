@@ -14,7 +14,7 @@ use function IrRegular\Hopper\Language\is_valid_key;
 class Eager implements HashMapInterface
 {
     /**
-     * @var array
+     * @var array|null
      */
     protected $index;
 
@@ -61,7 +61,7 @@ class Eager implements HashMapInterface
     public function get($key, $default = null)
     {
         if (!is_valid_key($key)) {
-            if ($this->areAllKeysValid()) {
+            if (is_null($this->index)) {
                 return $default;
             }
 
@@ -74,7 +74,7 @@ class Eager implements HashMapInterface
     public function isKey($key): bool
     {
         if (!is_valid_key($key)) {
-            if ($this->areAllKeysValid()) {
+            if (is_null($this->index)) {
                 return false;
             }
 
@@ -87,7 +87,7 @@ class Eager implements HashMapInterface
 
     public function getKeys(): iterable
     {
-        return $this->areAllKeysValid()
+        return is_null($this->index)
             ? array_keys($this->array)
             : array_values($this->index);
     }
@@ -140,7 +140,7 @@ class Eager implements HashMapInterface
 
     public function map(callable $closure): Mappable
     {
-        $keys = $this->areAllKeysValid() ? $this->index : array_keys($this->array);
+        $keys = !is_null($this->index) ? $this->index : array_keys($this->array);
         $collection = array_map($closure, $this->array, $keys);
 
         // for now - preserving keys as they were
@@ -173,21 +173,10 @@ class Eager implements HashMapInterface
      */
     protected function getValueKeyPairList(): array
     {
-        $index = $this->areAllKeysValid()
+        $index = is_null($this->index)
             ? array_keys($this->array)
             : $this->index;
 
         return array_map(null, $this->array, $index);
-    }
-
-    /**
-     * If $this->index is null, that means all keys of $this->array are valid keys (non-numeric strings).
-     *
-     * @return bool
-     * @see \IrRegular\Hopper\Language\is_valid_key()
-     */
-    protected function areAllKeysValid(): bool
-    {
-        return is_null($this->index);
     }
 }
