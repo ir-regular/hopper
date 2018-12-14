@@ -6,6 +6,7 @@ namespace IrRegular\Hopper\Ds\HashMap;
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Sequence;
+use IrRegular\Hopper\Ds\Set;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 
@@ -110,7 +111,7 @@ class Lazy extends Eager implements LazyInterface
         return parent::isKey($key);
     }
 
-    public function getKeys(): iterable
+    public function getKeys(): Set
     {
         $this->realise();
         return parent::getKeys();

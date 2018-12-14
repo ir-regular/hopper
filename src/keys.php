@@ -8,7 +8,7 @@ use IrRegular\Hopper\Ds\Indexed;
 /**
  * Return (eagerly) keys of an indexable collection.
  *
- * For unordered types (Set, HashMap) the order of keys is unspecified.
+ * Keys are unique. The order of keys is unspecified.
  * You must not rely on the current order, as it is an implementation detail and may change.
  *
  * @param iterable $collection

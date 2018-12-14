@@ -33,7 +33,7 @@ class EagerTest extends TestCase
 
         $this->assertFalse($hashMap->isKey(0));
         $this->assertTrue($hashMap->isKey('one'));
-        $this->assertEquals(array_keys($array), $hashMap->getKeys());
+        $this->assertEquals(array_keys($array), to_array($hashMap->getKeys()));
         $this->assertEquals(array_values($array), to_array($hashMap->getValues()));
         $this->assertEquals(
             // note that value comes before key
@@ -52,7 +52,7 @@ class EagerTest extends TestCase
 
         $this->assertFalse($hashMap->isKey(1));
         $this->assertTrue($hashMap->isKey('1'));
-        $this->assertTrue($keys === $hashMap->getKeys());
+        $this->assertTrue($keys === to_array($hashMap->getKeys()));
         $this->assertEquals($values, to_array($hashMap->getValues()));
         $this->assertTrue([['one', '1'], ['two', '2']] === to_array($hashMap->toVector()));
     }
@@ -64,7 +64,7 @@ class EagerTest extends TestCase
         $this->assertFalse($hashMap->isKey(0));
         $this->assertTrue($hashMap->isKey(1));
         $this->assertFalse($hashMap->isKey('1'));
-        $this->assertTrue([1, 2] === $hashMap->getKeys());
+        $this->assertTrue([1, 2] === to_array($hashMap->getKeys()));
         $this->assertEquals(['one', 'two'], to_array($hashMap->getValues()));
         $this->assertTrue([['one', 1], ['two', 2]] === to_array($hashMap->toVector()));
     }
@@ -82,7 +82,7 @@ class EagerTest extends TestCase
 
         $this->assertTrue($hashMap->isKey($o1));
         $this->assertFalse($hashMap->isKey($o3));
-        $this->assertEquals($keys, $hashMap->getKeys());
+        $this->assertEquals($keys, to_array($hashMap->getKeys()));
         $this->assertEquals($values, to_array($hashMap->getValues()));
 
         $this->assertEquals('Chef', $hashMap->get($o1));

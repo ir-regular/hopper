@@ -32,7 +32,7 @@ class LazyTest extends TestCase
     {
         $map = hash_map($this->generator(self::$stringIndexedArray));
 
-        $this->assertEquals(array_keys(self::$stringIndexedArray), keys($map));
+        $this->assertEquals(array_keys(self::$stringIndexedArray), to_array(keys($map)));
         $this->assertEquals(array_values(self::$stringIndexedArray), to_array(values($map)));
     }
 
@@ -125,6 +125,6 @@ class LazyTest extends TestCase
         });
 
         $this->assertEquals("Remy is a Chef", $lazy->get($o1));
-        $this->assertEquals($keys, $lazy->getKeys());
+        $this->assertEquals($keys, to_array($lazy->getKeys()));
     }
 }

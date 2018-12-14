@@ -6,6 +6,7 @@ namespace IrRegular\Hopper\Ds\Vector;
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Sequence;
+use IrRegular\Hopper\Ds\Set;
 
 /**
  *  Note how this class manually iterates over the generator.
@@ -111,7 +112,7 @@ class Lazy extends Eager implements LazyInterface
         return parent::isKey($key);
     }
 
-    public function getKeys(): iterable
+    public function getKeys(): Set
     {
         $this->realise();
         return parent::getKeys();

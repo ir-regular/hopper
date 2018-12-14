@@ -9,5 +9,5 @@ interface Indexed extends \ArrayAccess, Collection
 
     public function get($key, $default = null);
 
-    public function getKeys(): iterable;
+    public function getKeys(): Set;
 }

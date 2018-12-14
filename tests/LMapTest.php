@@ -35,7 +35,7 @@ class LMapTest extends TestCase
 
         $this->assertEquals(
             array_keys(self::$stringIndexedArray),
-            keys($result)
+            to_array(keys($result))
         );
     }
 

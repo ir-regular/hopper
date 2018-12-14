@@ -5,8 +5,10 @@ namespace IrRegular\Hopper\Ds\Vector;
 
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
+use IrRegular\Hopper\Ds\Set;
 use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Vector;
+use function IrRegular\Hopper\set;
 
 class Eager implements Vector
 {
@@ -83,9 +85,9 @@ class Eager implements Vector
         return array_key_exists($key, $this->array);
     }
 
-    public function getKeys(): iterable
+    public function getKeys(): Set
     {
-        return array_keys($this->array);
+        return set(array_keys($this->array));
     }
 
     public function offsetExists($offset)

@@ -26,7 +26,7 @@ class EagerTest extends TestCase
         $vector = vector([1 => 'a', 2 => 'b', 5 => 'e']);
 
         $this->assertEquals(3, $vector->count());
-        $this->assertEquals([0, 1, 2], $vector->getKeys());
+        $this->assertEquals([0, 1, 2], to_array($vector->getKeys()));
         $this->assertEquals(['a', 'b', 'e'], to_array($vector));
     }
 

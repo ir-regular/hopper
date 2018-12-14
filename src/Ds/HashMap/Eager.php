@@ -7,10 +7,12 @@ use IrRegular\Hopper\Ds\HashMap as HashMapInterface;
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Sequence;
+use IrRegular\Hopper\Ds\Set;
 use IrRegular\Hopper\Ds\Vector;
 use IrRegular\Hopper\Ds\Vector\Eager as EagerVector;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
+use function IrRegular\Hopper\set;
 
 class Eager implements HashMapInterface
 {
@@ -86,11 +88,11 @@ class Eager implements HashMapInterface
         }
     }
 
-    public function getKeys(): iterable
+    public function getKeys(): Set
     {
         return is_null($this->index)
-            ? array_keys($this->array)
-            : array_values($this->index);
+            ? set(array_keys($this->array))
+            : set(array_values($this->index));
     }
 
     public function offsetExists($offset)
