@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: circleci/php:7.2
+
+    working_directory: ~/hopper
+
+    steps:
+    - checkout
+
+    # Download and cache dependencies
+    - restore_cache:
+        keys:
+        - v1-dependencies-{{ checksum "composer.json" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+    - run: composer install -n --prefer-dist
+
+    - save_cache:
+        paths:
+        - ./vendor
+        key: v1-dependencies-{{ checksum "composer.json" }}
+
+    - run:
+        name: Coding standards violation check (phpcs)
+        command: bin/phpcs
+    - run:
+        name: Static analysis (phpstan)
+        command: bin/phpstan analyze --level max ./src
+    - run:
+        name: Unit tests (phpunit)
+        command: bin/phpunit --testsuite unit --testdox
