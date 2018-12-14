@@ -5,6 +5,8 @@ namespace IrRegular\Hopper;
 
 use IrRegular\Hopper\Ds\Lazy;
 use IrRegular\Hopper\Ds\Mappable;
+use IrRegular\Hopper\Ds\HashMap\Lazy as LazyHashMap;
+use IrRegular\Hopper\Ds\Vector\Lazy as LazyVector;
 
 /**
  * Map function, lazy.
@@ -19,6 +21,12 @@ function lmap(callable $closure, iterable $collection): Lazy
         return $collection->lMap($closure);
     }
 
+    $generator = (function () use ($closure, $collection) {
+        foreach ($collection as $key => $element) {
+            yield $key => $closure($element);
+        }
+    })();
+
     // choose a collection type consistent with how `array_map` behaves
     // (that is, non-contiguous numerical keys are ignored and re-indexed)
 
@@ -29,18 +37,8 @@ function lmap(callable $closure, iterable $collection): Lazy
     // null $key means failure; empty collection
 
     if (is_null($key) || is_int($key) || ctype_xdigit($key)) {
-        $collectionConstructor = '\IrRegular\Hopper\vector';
+        return new LazyVector($generator);
     } else {
-        $collectionConstructor = '\IrRegular\Hopper\hash_map';
+        return new LazyHashMap($generator);
     }
-
-    $generator = (function () use ($closure, $collection) {
-        foreach ($collection as $key => $element) {
-            yield $key => $closure($element);
-        }
-    })();
-
-    // Calling `vector()` or `hash_map()` on a generator creates a HashMap\Lazy or Vector\Lazy
-
-    return $collectionConstructor($generator);
 }
