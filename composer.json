@@ -58,6 +58,7 @@
       "src/second.php",
       "src/set.php",
       "src/size.php",
+      "src/to_array.php",
       "src/values.php",
       "src/vector.php",
       "src/Language/convert_to_key.php",
