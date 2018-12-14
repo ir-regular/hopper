@@ -6,6 +6,7 @@ namespace IrRegular\Tests\Hopper\Ds\HashMap;
 use IrRegular\Hopper\Ds\HashMap\Lazy;
 use function IrRegular\Hopper\hash_map;
 use function IrRegular\Hopper\keys;
+use function IrRegular\Hopper\to_array;
 use function IrRegular\Hopper\values;
 use IrRegular\Hopper\Ds\HashMap\Lazy as LazyHashMap;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
@@ -32,7 +33,7 @@ class LazyTest extends TestCase
         $map = hash_map($this->generator(self::$stringIndexedArray));
 
         $this->assertEquals(array_keys(self::$stringIndexedArray), keys($map));
-        $this->assertEquals(array_values(self::$stringIndexedArray), values($map));
+        $this->assertEquals(array_values(self::$stringIndexedArray), to_array(values($map)));
     }
 
     public function testGetCountRealisesEntireGenerator()

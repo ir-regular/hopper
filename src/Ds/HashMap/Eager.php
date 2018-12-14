@@ -6,6 +6,7 @@ namespace IrRegular\Hopper\Ds\HashMap;
 use IrRegular\Hopper\Ds\HashMap as HashMapInterface;
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
+use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Vector;
 use IrRegular\Hopper\Ds\Vector\Eager as EagerVector;
 use function IrRegular\Hopper\Language\convert_to_key;
@@ -41,9 +42,9 @@ class Eager implements HashMapInterface
         return count($this->array);
     }
 
-    public function getValues(): iterable
+    public function getValues(): Sequence
     {
-        return array_values($this->array);
+        return new EagerVector(array_values($this->array));
     }
 
     public function contains($value): bool

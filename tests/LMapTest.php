@@ -9,7 +9,7 @@ use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\keys;
 use function IrRegular\Hopper\lmap;
 use function IrRegular\Hopper\second;
-use function IrRegular\Hopper\values;
+use function IrRegular\Hopper\to_array;
 use PHPUnit\Framework\TestCase;
 
 class LMapTest extends TestCase
@@ -25,7 +25,7 @@ class LMapTest extends TestCase
     {
         $this->assertEquals(
             [2, 3, 2, 5, 4, 2, 5],
-            values(lmap([$this, 'increment'], self::$array))
+            to_array(lmap([$this, 'increment'], self::$array))
         );
     }
 
@@ -44,7 +44,7 @@ class LMapTest extends TestCase
         $result = lmap([$this, 'increment'], self::$vector);
 
         $this->assertInstanceOf(LazyVector::class, $result);
-        $this->assertEquals([2, 3, 2, 5, 4, 2, 5], values($result));
+        $this->assertEquals([2, 3, 2, 5, 4, 2, 5], to_array($result));
     }
 
     public function testHashMapIsMappable()
@@ -64,7 +64,7 @@ class LMapTest extends TestCase
         // currently, degenerates to a vector
 
         $this->assertInstanceOf(LazyVector::class, $result);
-        $this->assertEquals([2, 3, 5, 4], values($result));
+        $this->assertEquals([2, 3, 5, 4], to_array($result));
     }
 
     public function testMapOnGeneratorIsLazy()

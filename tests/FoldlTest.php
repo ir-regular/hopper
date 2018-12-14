@@ -20,7 +20,7 @@ class FoldlTest extends TestCase
         // Note I'm using foldl rather than foldl1 since the latter will result in weird behaviour:
         // as it uses first() to get the first value, it'd initialise with a [key,value] element.
         //
-        // If you _really_ want to foldl1 over hash_map values, use `foldl1($f, values($hm))`
+        // If you _really_ want to foldl1 over hash_map values, use `foldl1($f, to_array(values($hm)))`
 
         $this->assertEquals(
             9,

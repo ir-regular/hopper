@@ -8,7 +8,7 @@ use function IrRegular\Hopper\first;
 use function IrRegular\Hopper\get;
 use function IrRegular\Hopper\lmap;
 use function IrRegular\Hopper\second;
-use function IrRegular\Hopper\values;
+use function IrRegular\Hopper\to_array;
 use function IrRegular\Hopper\vector;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +26,7 @@ class LazyTest extends TestCase
     {
         $vector = vector($this->generator(self::$array));
 
-        $this->assertEquals(self::$array, values($vector));
+        $this->assertEquals(self::$array, to_array($vector));
     }
 
     public function testVectorCreatesLazyVectorFromGenerator()
@@ -53,7 +53,7 @@ class LazyTest extends TestCase
         $vector = vector($this->generator([1, 2, 3]));
         $vector->count();
         $result = $vector->map([$this, 'increment']);
-        $this->assertEquals([2, 3, 4], values($result));
+        $this->assertEquals([2, 3, 4], to_array($result));
     }
 
     public function testChecksGeneratorForMoreElements()
@@ -109,8 +109,8 @@ class LazyTest extends TestCase
         $rest = $vector->rest();
 
         $this->assertInstanceOf(LazyVector::class, $rest);
-        $this->assertEquals([2], values($rest));
-        $this->assertEquals([1, 2], $vector->getValues());
+        $this->assertEquals([2], to_array($rest));
+        $this->assertEquals([1, 2], to_array($vector));
     }
 
     public function testDeeplyNestedVectorsHaveNoSkew()

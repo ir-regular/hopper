@@ -6,10 +6,11 @@ namespace IrRegular\Hopper;
 use IrRegular\Hopper\Ds\Collection;
 
 /**
- * Return (eagerly) values of a collection, resetting the keys to a contiguous numeric range.
+ * Return (eagerly) values of $collection, resetting the keys to a contiguous numeric range.
  *
  * For unordered types (Set, HashMap) the order of values is unspecified.
- * You must not rely on the current order, as it is an implementation detail and may change.
+ * You must not rely on the order being preserved during processing, as it is
+ * an implementation detail and may change.
  *
  * @param iterable $collection
  * @return iterable

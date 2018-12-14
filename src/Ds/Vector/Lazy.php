@@ -50,7 +50,7 @@ class Lazy extends Eager implements LazyInterface
         return parent::count();
     }
 
-    public function getValues(): iterable
+    public function getValues(): Sequence
     {
         $this->realise();
         return parent::getValues();

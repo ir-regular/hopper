@@ -37,9 +37,9 @@ class Eager implements Vector
         return count($this->array);
     }
 
-    public function getValues(): iterable
+    public function getValues(): Sequence
     {
-        return $this->array;
+        return $this;
     }
 
     public function getIterator()

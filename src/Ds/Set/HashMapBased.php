@@ -7,9 +7,10 @@ use IrRegular\Hopper\Ds\Lazy;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 use IrRegular\Hopper\Ds\Mappable;
+use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Set as SetInterface;
 use IrRegular\Hopper\Ds\Vector;
-use IrRegular\Hopper\Ds\Vector\Eager;
+use IrRegular\Hopper\Ds\Vector\Eager as EagerVector;
 
 class HashMapBased implements SetInterface
 {
@@ -62,9 +63,9 @@ class HashMapBased implements SetInterface
         }
     }
 
-    public function getValues(): iterable
+    public function getValues(): Sequence
     {
-        return $this->array;
+        return new EagerVector(array_values($this->array));
     }
 
     public function getIterator()
@@ -109,6 +110,6 @@ class HashMapBased implements SetInterface
 
     public function toVector(): Vector
     {
-        return new Eager($this->array);
+        return new EagerVector($this->array);
     }
 }

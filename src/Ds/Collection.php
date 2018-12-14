@@ -17,5 +17,5 @@ interface Collection extends \Countable, \IteratorAggregate
 
     public function contains($value): bool;
 
-    public function getValues(): iterable;
+    public function getValues(): Sequence;
 }

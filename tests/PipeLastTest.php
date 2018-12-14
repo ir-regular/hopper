@@ -5,7 +5,7 @@ namespace IrRegular\Tests\Hopper;
 
 use function IrRegular\Hopper\partial_first;
 use function IrRegular\Hopper\pipe_last;
-use function IrRegular\Hopper\values;
+use function IrRegular\Hopper\to_array;
 use PHPUnit\Framework\TestCase;
 
 class PipeLastTest extends TestCase
@@ -26,6 +26,6 @@ class PipeLastTest extends TestCase
             ['\IrRegular\Hopper\map', partial_first([$this, 'increment'], 2)]
         );
 
-        $this->assertEquals([4, 5, 6], values($pipe($values)));
+        $this->assertEquals([4, 5, 6], to_array($pipe($values)));
     }
 }

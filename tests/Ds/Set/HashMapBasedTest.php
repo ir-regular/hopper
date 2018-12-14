@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper\Ds\Set;
 
 use function IrRegular\Hopper\set;
+use function IrRegular\Hopper\to_array;
 use IrRegular\Tests\Hopper\CollectionSetUpTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -60,6 +61,6 @@ class HashMapBasedTest extends TestCase
         // key type matters!
         $this->assertTrue($set->contains('1'));
         $this->assertFalse($set->contains(1));
-        $this->assertTrue(['1', '2'] === $set->getValues());
+        $this->assertTrue(['1', '2'] === to_array($set));
     }
 }

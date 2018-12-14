@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Tests\Hopper\Ds\HashMap;
 
 use function IrRegular\Hopper\hash_map;
+use function IrRegular\Hopper\to_array;
 use PHPUnit\Framework\TestCase;
 
 class EagerTest extends TestCase
@@ -33,7 +34,7 @@ class EagerTest extends TestCase
         $this->assertFalse($hashMap->isKey(0));
         $this->assertTrue($hashMap->isKey('one'));
         $this->assertEquals(array_keys($array), $hashMap->getKeys());
-        $this->assertEquals(array_values($array), $hashMap->getValues());
+        $this->assertEquals(array_values($array), to_array($hashMap->getValues()));
         $this->assertEquals(
             // note that value comes before key
             [['ichi', 'one'], ['ni', 'two']],
@@ -52,8 +53,8 @@ class EagerTest extends TestCase
         $this->assertFalse($hashMap->isKey(1));
         $this->assertTrue($hashMap->isKey('1'));
         $this->assertTrue($keys === $hashMap->getKeys());
-        $this->assertEquals($values, $hashMap->getValues());
-        $this->assertTrue([['one', '1'], ['two', '2']] === $hashMap->toVector()->getValues());
+        $this->assertEquals($values, to_array($hashMap->getValues()));
+        $this->assertTrue([['one', '1'], ['two', '2']] === to_array($hashMap->toVector()));
     }
 
     public function testHashMapWithIntegerKeys()
@@ -64,8 +65,8 @@ class EagerTest extends TestCase
         $this->assertTrue($hashMap->isKey(1));
         $this->assertFalse($hashMap->isKey('1'));
         $this->assertTrue([1, 2] === $hashMap->getKeys());
-        $this->assertEquals(['one', 'two'], $hashMap->getValues());
-        $this->assertTrue([['one', 1], ['two', 2]] === $hashMap->toVector()->getValues());
+        $this->assertEquals(['one', 'two'], to_array($hashMap->getValues()));
+        $this->assertTrue([['one', 1], ['two', 2]] === to_array($hashMap->toVector()));
     }
 
     public function testHashMapWithObjectKeys()
@@ -82,7 +83,7 @@ class EagerTest extends TestCase
         $this->assertTrue($hashMap->isKey($o1));
         $this->assertFalse($hashMap->isKey($o3));
         $this->assertEquals($keys, $hashMap->getKeys());
-        $this->assertEquals($values, $hashMap->getValues());
+        $this->assertEquals($values, to_array($hashMap->getValues()));
 
         $this->assertEquals('Chef', $hashMap->get($o1));
         $this->assertNull($hashMap->get($o3));
