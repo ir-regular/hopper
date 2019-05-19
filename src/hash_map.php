@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace IrRegular\Hopper;
 
 use IrRegular\Hopper\Ds\HashMap;
+use IrRegular\Hopper\Ds\HashMap\ArrayWrap;
 use IrRegular\Hopper\Ds\HashMap\Eager as EagerHashMap;
 use IrRegular\Hopper\Ds\HashMap\Lazy as LazyHashMap;
 use function IrRegular\Hopper\Language\convert_to_key;
@@ -58,5 +59,7 @@ function hash_map(iterable $collection, iterable $keys = null): HashMap
         next($keys);
     }
 
-    return new EagerHashMap($values, $containsUnsafeKeys ? $stringIndex : null);
+    return $containsUnsafeKeys
+        ? new EagerHashMap($values, $stringIndex)
+        : new ArrayWrap($values);
 }

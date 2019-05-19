@@ -3,60 +3,25 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds\HashMap;
 
-use IrRegular\Hopper\Ds\HashMap as HashMapInterface;
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
-use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Set;
-use IrRegular\Hopper\Ds\Vector;
-use IrRegular\Hopper\Ds\Vector\Eager as EagerVector;
 use function IrRegular\Hopper\Language\convert_to_key;
 use function IrRegular\Hopper\Language\is_valid_key;
 use function IrRegular\Hopper\set;
 
-class Eager implements HashMapInterface
+class Eager extends ArrayWrap
 {
-    /**
-     * @var array|null
-     */
-    protected $index;
-
     /**
      * @var array
      */
-    protected $array;
+    protected $index;
 
-    public function __construct(array $collection, ?array $stringIndex = null)
+    public function __construct(array $collection, array $stringIndex)
     {
-        $this->array = $collection;
+        parent::__construct($collection);
+
         $this->index = $stringIndex;
-    }
-
-    // Collection
-
-    public function isEmpty(): bool
-    {
-        return empty($this->array);
-    }
-
-    public function count(): int
-    {
-        return count($this->array);
-    }
-
-    public function getValues(): Sequence
-    {
-        return new EagerVector(array_values($this->array));
-    }
-
-    public function contains($value): bool
-    {
-        return in_array($value, $this->array);
-    }
-
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->getValueKeyPairList());
     }
 
     // Indexed
@@ -64,90 +29,31 @@ class Eager implements HashMapInterface
     public function get($key, $default = null)
     {
         if (!is_valid_key($key)) {
-            if (is_null($this->index)) {
-                return $default;
-            }
-
             $key = convert_to_key($key);
         }
 
-        return $this->array[$key] ?? $default;
+        return parent::get($key, $default);
     }
 
     public function isKey($key): bool
     {
         if (!is_valid_key($key)) {
-            if (is_null($this->index)) {
-                return false;
-            }
-
             $key = convert_to_key($key);
-            return array_key_exists($key, $this->index);
-        } else {
-            return array_key_exists($key, $this->array);
         }
+
+        return parent::isKey($key);
     }
 
     public function getKeys(): Set
     {
-        return is_null($this->index)
-            ? set(array_keys($this->array))
-            : set(array_values($this->index));
-    }
-
-    public function offsetExists($offset)
-    {
-        return $this->isKey($offset);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->get($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        throw new \BadMethodCallException('Hopper collections are not mutable');
-    }
-
-    public function offsetUnset($offset)
-    {
-        throw new \BadMethodCallException('Hopper collections are not mutable');
-    }
-
-    // Foldable
-
-    public function foldl(callable $closure, $initialValue)
-    {
-        return array_reduce(
-            $this->getValueKeyPairList(),
-            function ($carry, $pair) use ($closure) {
-                return $closure($carry, ...$pair);
-            },
-            $initialValue
-        );
-    }
-
-    public function foldr(callable $closure, $initialValue)
-    {
-        return array_reduce(
-            array_reverse($this->getValueKeyPairList()),
-            function ($carry, $pair) use ($closure) {
-                return $closure($carry, ...$pair);
-            },
-            $initialValue
-        );
+        return set(array_values($this->index));
     }
 
     // Mappable
 
     public function map(callable $closure): Mappable
     {
-        $keys = !is_null($this->index) ? $this->index : array_keys($this->array);
-        $collection = array_map($closure, $this->array, $keys);
-
-        // for now - preserving keys as they were
-
+        $collection = $this->getValueKeyPairList($closure);
         return new self($collection, $this->index);
     }
 
@@ -159,27 +65,35 @@ class Eager implements HashMapInterface
             }
         })();
 
-        return new Lazy($generator, Lazy::FORMAT_VK);
-    }
-
-    // HashMaph
-
-    public function toVector(): Vector
-    {
-        return new EagerVector($this->getValueKeyPairList());
+        return new Lazy($this->createMutable(), $generator, Lazy::FORMAT_VK);
     }
 
     /**
      * Returns an (eagerly generated) array of [value, key] pairs of original array.
      *
+     * @param callable|null $callback Apply optional callback to the pairs.
      * @return array
      */
-    protected function getValueKeyPairList(): array
+    protected function getValueKeyPairList(?callable $callback = null): array
     {
-        $index = is_null($this->index)
-            ? array_keys($this->array)
-            : $this->index;
+        return array_map($callback, $this->array, $this->index);
+    }
 
-        return array_map(null, $this->array, $index);
+    protected function createMutable()
+    {
+        return new class extends Eager {
+            public function offsetSet($offset, $value)
+            {
+                if (!is_valid_key($offset)) {
+                    $safeKey = convert_to_key($offset);
+                } else {
+                    $safeKey = $offset;
+                }
+
+                $this->index[$safeKey] = $offset;
+
+                parent::offsetSet($safeKey, $value);
+            }
+        };
     }
 }

@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace IrRegular\Hopper\Ds\HashMap;
 
+use IrRegular\Hopper\Ds\HashMap;
 use IrRegular\Hopper\Ds\Lazy as LazyInterface;
 use IrRegular\Hopper\Ds\Mappable;
 use IrRegular\Hopper\Ds\Sequence;
 use IrRegular\Hopper\Ds\Set;
-use function IrRegular\Hopper\Language\convert_to_key;
-use function IrRegular\Hopper\Language\is_valid_key;
+use IrRegular\Hopper\Ds\Vector;
 
-class Lazy extends Eager implements LazyInterface
+class Lazy implements HashMap, LazyInterface
 {
     /**
      * Generator assumed to `yield $key => $value` formatted data.
@@ -34,55 +34,64 @@ class Lazy extends Eager implements LazyInterface
      */
     protected $generatorFormat;
 
-    public function __construct(\Generator $lazyTail, $format = self::FORMAT_PHP)
-    {
-        parent::__construct([], []);
+    /**
+     * @var HashMap
+     */
+    private $hashMap;
 
+    /**
+     * @var string[]
+     */
+    private $keyBuffer = [];
+
+    public function __construct(HashMap $hashMap, \Generator $lazyTail, $format = self::FORMAT_PHP)
+    {
         $this->lazyTail = $lazyTail;
         $this->generatorFormat = $format;
+        $this->hashMap = $hashMap;
     }
 
     // Collection
 
     public function isEmpty(): bool
     {
-        return empty($this->array) && !$this->lazyTail->valid();
+        return $this->hashMap->isEmpty() && !$this->lazyTail->valid();
     }
 
     public function count(): int
     {
         $this->realise();
-        return parent::count();
+        return $this->hashMap->count();
     }
 
     public function getValues(): Sequence
     {
         $this->realise();
-        return parent::getValues();
+        return $this->hashMap->getValues();
     }
 
     public function contains($value): bool
     {
         $this->realise();
-        return parent::contains($value);
+        return $this->hashMap->contains($value);
     }
 
     public function getIterator()
     {
         if (!$this->lazyTail->valid()) {
-            yield from parent::getIterator();
+            yield from $this->hashMap->getIterator();
             return;
         }
 
         // if, however, lazyTail is not yet fully realised:
 
-        if ($safeKey = $this->realiseFirstElement()) {
-            yield [$this->array[$safeKey], $this->index[$safeKey] ?? $safeKey];
+        if ($key = $this->realiseFirstElement()) {
+            yield [$this->hashMap->get($key), $key];
 
             $current = 0;
 
-            while ($safeKey = $this->realiseElementAfter($current)) {
-                yield [$this->array[$safeKey], $this->index[$safeKey] ?? $safeKey];
+            while ($key = $this->realiseElementAfter($current)) {
+                yield [$this->hashMap->get($key), $key];
             }
         }
     }
@@ -91,30 +100,45 @@ class Lazy extends Eager implements LazyInterface
 
     public function get($key, $default = null)
     {
-        $safeKey = is_valid_key($key)
-            ? $key
-            : convert_to_key($key);
+        $this->realiseUpTo($key);
 
-        $this->realiseUpTo($safeKey);
-
-        return parent::get($key, $default);
+        return $this->hashMap->get($key, $default);
     }
 
     public function isKey($key): bool
     {
-        $safeKey = is_valid_key($key)
-            ? $key
-            : convert_to_key($key);
+        $this->realiseUpTo($key);
 
-        $this->realiseUpTo($safeKey);
-
-        return parent::isKey($key);
+        return $this->hashMap->isKey($key);
     }
 
     public function getKeys(): Set
     {
         $this->realise();
-        return parent::getKeys();
+
+        return $this->hashMap->getKeys();
+    }
+
+    // ArrayAccess, via Indexed
+
+    public function offsetExists($offset)
+    {
+        return $this->isKey($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        throw new \BadMethodCallException('Hopper collections are not mutable');
+    }
+
+    public function offsetUnset($offset)
+    {
+        throw new \BadMethodCallException('Hopper collections are not mutable');
     }
 
     // Foldable
@@ -136,7 +160,8 @@ class Lazy extends Eager implements LazyInterface
     public function foldr(callable $closure, $initialValue)
     {
         $this->realise();
-        return parent::foldr($closure, $initialValue);
+
+        return $this->hashMap->foldr($closure, $initialValue);
     }
 
     // Mappable
@@ -144,7 +169,7 @@ class Lazy extends Eager implements LazyInterface
     public function map(callable $closure): Mappable
     {
         $this->realise();
-        return parent::map($closure);
+        return $this->hashMap->map($closure);
     }
 
     public function lMap(callable $closure): LazyInterface
@@ -155,7 +180,15 @@ class Lazy extends Eager implements LazyInterface
             }
         })();
 
+        // @TODO
         return new Lazy($generator, Lazy::FORMAT_VK);
+    }
+
+    // HashMap
+
+    public function toVector(): Vector
+    {
+        return $this->hashMap->toVector();
     }
 
     // Lazy
@@ -184,7 +217,7 @@ class Lazy extends Eager implements LazyInterface
     protected function ensureRealisedAtLeast(int $elementCount): void
     {
         assert($elementCount > 0);
-        $elementsToAdd = $elementCount - count($this->array);
+        $elementsToAdd = $elementCount - $this->hashMap->count();
 
         $this->realiseUntil(function () use ($elementsToAdd) {
             static $elementsAdded = 0;
@@ -193,53 +226,53 @@ class Lazy extends Eager implements LazyInterface
     }
 
     /**
-     * Realise elements of generator until you encounter one with key equal to $safeLookupKey.
+     * Realise elements of generator until you encounter one with key equal to $lookupKey.
      *
-     * @param string $safeLookupKey
+     * @param mixed $lookupKey
      * @return void
      */
-    protected function realiseUpTo(string $safeLookupKey): void
+    protected function realiseUpTo($lookupKey): void
     {
-        $this->realiseUntil(function ($safeKey) use ($safeLookupKey) {
-            return ($safeKey !== null) && ($safeKey === $safeLookupKey);
+        $this->realiseUntil(function ($key) use ($lookupKey) {
+            return ($key !== null) && ($key === $lookupKey);
         });
     }
 
     /**
-     * Realise and cache elements of generator until $isDone($safeKey) returns true, or until generator runs out.
+     * Realise and cache elements of generator until $isDone($key) returns true, or until generator runs out.
      *
      * @param callable|null $isDone
      * @return void
      */
     protected function realiseUntil(?callable $isDone): void
     {
-        $safeKey = $this->realiseFirstElement();
+        $key = $this->realiseFirstElement();
         $current = 0;
 
-        while ($safeKey && (!$isDone || !$isDone($safeKey))) {
-            $safeKey = $this->realiseElementAfter($current++);
+        while ($key && (!$isDone || !$isDone($key))) {
+            $key = $this->realiseElementAfter($current++);
         }
 
-        $this->clearIndexIfAllKeysValid();
+        $this->clearBuffer();
     }
 
     /**
      * Ensure the first element of the generator is realised.
      *
-     * @return string|null Safe key of the first element, or null to indicate generator is finished.
+     * @return mixed Key of the first element, or null to indicate generator is finished.
      */
-    protected function realiseFirstElement(): ?string
+    protected function realiseFirstElement()
     {
         $safeKey = null;
 
-        if (count($this->array) == 0) {
+        if ($this->hashMap->count() == 0) {
             if ($this->lazyTail->valid()) {
                 $safeKey = $this->realiseCurrentPair();
             } else {
-                $this->clearIndexIfAllKeysValid();
+                $this->clearBuffer();
             }
         } elseif ($this->lazyTail->valid()) {
-            $safeKey = array_keys($this->array)[0];
+            $safeKey = $this->keyBuffer[0];
         }
 
         return $safeKey;
@@ -251,38 +284,38 @@ class Lazy extends Eager implements LazyInterface
      * Note that this assumes all elements in range (0;$current) have already been realised.
      *
      * @param int $current
-     * @return string|null The just-realised element key (or null to indicate generator is finished).
+     * @return mixed The just-realised element key (or null to indicate generator is finished).
      */
-    protected function realiseElementAfter(int $current): ?string
+    protected function realiseElementAfter(int $current)
     {
         assert($current >= 0);
 
-        $safeKey = null;
+        $key = null;
 
-        if (count($this->array) == $current + 1) {
+        if ($this->hashMap->count() == $current + 1) {
             $this->lazyTail->next();
 
             if ($this->lazyTail->valid()) {
-                $safeKey = $this->realiseCurrentPair();
+                $key = $this->realiseCurrentPair();
             } else {
-                $this->clearIndexIfAllKeysValid();
+                $this->clearBuffer();
             }
         } elseif ($this->lazyTail->valid()) {
-            $safeKey = $safeKey = array_keys($this->array)[$current + 1];
+            $key = $this->keyBuffer[$current + 1];
         }
 
-        return $safeKey;
+        return $key;
     }
 
     /**
-     * Realise next (key,value) pair and return the key in safe-key (non-numeric string) form.
+     * Realise next (key,value) pair and return the key.
      *
      * Uses generatorFormat to interpret generator results.
      * Equivalent to current() in that it does not advance the generator to next element.
      *
-     * @return string
+     * @return mixed
      */
-    protected function realiseCurrentPair(): string
+    protected function realiseCurrentPair()
     {
         if ($this->generatorFormat == self::FORMAT_PHP) {
             $key = $this->lazyTail->key();
@@ -291,12 +324,11 @@ class Lazy extends Eager implements LazyInterface
             [$value, $key] = $this->lazyTail->current();
         }
 
-        $safeKey = is_valid_key($key) ? $key  : convert_to_key($key);
+        $this->hashMap[$key] = $value;
 
-        $this->index[$safeKey] = $key;
-        $this->array[$safeKey] = $value;
+        $this->keyBuffer[] = $key;
 
-        return $safeKey;
+        return $key;
     }
 
     /**
@@ -306,24 +338,10 @@ class Lazy extends Eager implements LazyInterface
      *
      * @return void
      */
-    protected function clearIndexIfAllKeysValid(): void
+    protected function clearBuffer(): void
     {
-        if (is_null($this->index) || $this->lazyTail->valid()) {
-            return;
-        }
+        assert(!$this->lazyTail->valid());
 
-        $allKeysValid = true;
-
-        foreach ($this->index as $safeKey => $unsafeKey) {
-            if ($safeKey !== $unsafeKey) {
-                $allKeysValid = false;
-                break;
-            }
-        }
-
-        if ($allKeysValid) {
-            // this causes $this->areAllKeysValid() to start returning true
-            $this->index = null;
-        }
+        $this->keyBuffer = [];
     }
 }
